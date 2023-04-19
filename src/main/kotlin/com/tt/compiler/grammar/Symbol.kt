@@ -14,17 +14,17 @@ data class Symbol(
         /**
          * 语法的结尾符号
          */
-        private val End = Symbol("$", true)
+        val End = Symbol("$", true)
 
         /**
          * 空串
          */
-        private val Empty = Symbol("ε", true)
+        val Empty = Symbol("ε", true)
 
         /**
          * 开始符号
          */
-        private val Start = Symbol("S'", false)
+        val Start = Symbol("S'", false)
 
         fun from(value: String): Symbol {
             return value.trim().ifBlank {
@@ -60,5 +60,9 @@ data class Symbol(
      */
     fun isEmpty(): Boolean {
         return this == Empty
+    }
+
+    override fun toString(): String {
+        return "Symbol { $value }"
     }
 }
