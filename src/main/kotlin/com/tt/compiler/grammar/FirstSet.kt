@@ -23,6 +23,11 @@ class FirstSet(productions: List<Production>) : HashMap<Symbol, MutableSet<Pair<
         }
     }
 
+    /**
+     * 遍历一遍产生式更新现有的 FirstSet
+     * @param productions 产生式
+     * @return 如果更新成功返回 true，否则返回 false
+     */
     private fun update(productions: List<Production>): Boolean {
         var updated = false
         productions.forEach { production ->
@@ -48,7 +53,7 @@ class FirstSet(productions: List<Production>) : HashMap<Symbol, MutableSet<Pair<
     }
 
     override fun toString(): String {
-        return "First {\n" + this.map { it ->
+        return "FirstSet {\n" + this.map { it ->
             "\t${it.key} => ${it.value.map { it.first }}"
         }.joinToString("\n") + "\n}"
     }

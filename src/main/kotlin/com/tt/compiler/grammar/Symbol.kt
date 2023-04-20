@@ -24,7 +24,7 @@ data class Symbol(
         /**
          * 开始符号
          */
-        val Start = Symbol("S'", false)
+        val Start = Symbol("S", false)
 
         fun from(value: String): Symbol {
             return value.trim().ifBlank {

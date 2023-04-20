@@ -1,6 +1,7 @@
 package com.tt.compiler.component
 
 import com.tt.compiler.grammar.FirstSet
+import com.tt.compiler.grammar.FollowSet
 import com.tt.compiler.grammar.Production
 import com.tt.compiler.grammar.Symbol
 import kotlin.test.BeforeTest
@@ -64,6 +65,31 @@ class GrammarAnalyzerTest {
             s("T'") to setOf(s("*"), s("ε")),
             s("F") to setOf(s("id"), s("("))
         ), firstSet.mapValues { it -> it.value.map { it.first }.toSet() })
+    }
+
+    @Test
+    fun testFollowSet() {
+        val productions = grammar(
+            """
+            S  -> T S'
+            S' -> + T S' | ε
+            T  -> F T'
+            T' -> * F T' | ε
+            F  -> ( S ) | id
+        """.trimIndent()
+        )
+
+        val firstSet = FirstSet(productions)
+        val followSet = FollowSet(firstSet, productions)
+        assertEquals(
+            mapOf(
+                s("S") to setOf(s("$"), s(")")),
+                s("S'") to setOf(s("$"), s(")")),
+                s("T") to setOf(s("$"), s("+"), s(")")),
+                s("T'") to setOf(s("$"), s("+"), s(")")),
+                s("F") to setOf(s("$"), s("+"), s("*"), s(")"))
+            ), followSet
+        )
     }
 }
 
