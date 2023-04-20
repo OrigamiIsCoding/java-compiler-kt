@@ -1,9 +1,6 @@
 package com.tt.compiler.component
 
-import com.tt.compiler.grammar.FirstSet
-import com.tt.compiler.grammar.FollowSet
-import com.tt.compiler.grammar.Production
-import com.tt.compiler.grammar.Symbol
+import com.tt.compiler.grammar.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -89,6 +86,33 @@ class GrammarAnalyzerTest {
                 s("T'") to setOf(s("$"), s("+"), s(")")),
                 s("F") to setOf(s("$"), s("+"), s("*"), s(")"))
             ), followSet
+        )
+    }
+
+    @Test
+    fun testLLOneParsingTable() {
+        val productions = grammar(
+            """
+            S  -> T S'
+            S' -> + T S' | ε
+            T  -> F T'
+            T' -> * F T' | ε
+            F  -> ( S ) | id
+        """.trimIndent()
+        )
+
+        val firstSet = FirstSet(productions)
+        val followSet = FollowSet(firstSet, productions)
+        val table = LLOneParsingTable(firstSet, followSet)
+        assertEquals(
+            """
+            |              | (            | id           | *            | ${'$'}            | +            | )            | (            | id           | +            | ${'$'}            | )            | (            | id           |
+            | F            | F -> ( S )   | F -> id      | null         | null         | null         | null         | F -> ( S )   | F -> id      | null         | null         | null         | F -> ( S )   | F -> id      |
+            | T'           | null         | null         | T' -> * F T' | T' -> ε      | T' -> ε      | T' -> ε      | null         | null         | T' -> ε      | T' -> ε      | T' -> ε      | null         | null         |
+            | T            | T -> F T'    | T -> F T'    | null         | null         | null         | null         | T -> F T'    | T -> F T'    | null         | null         | null         | T -> F T'    | T -> F T'    |
+            | S'           | null         | null         | null         | S' -> ε      | S' -> + T S' | S' -> ε      | null         | null         | S' -> + T S' | S' -> ε      | S' -> ε      | null         | null         |
+            | S            | S -> T S'    | S -> T S'    | null         | null         | null         | null         | S -> T S'    | S -> T S'    | null         | null         | null         | S -> T S'    | S -> T S'    |
+        """.trimIndent(), table.toString()
         )
     }
 }

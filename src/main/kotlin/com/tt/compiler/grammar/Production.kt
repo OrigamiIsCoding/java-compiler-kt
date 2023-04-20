@@ -44,7 +44,11 @@ data class Production(
     }
 
     override fun toString(): String {
-        return "Production { ${left.value} $Separator ${right.map(Symbol::value).joinToString(" ")} }"
+        return "Production { ${toExpression()} }"
+    }
+
+    fun toExpression(): String {
+        return "${left.value} $Separator ${right.map(Symbol::value).joinToString(" ")}"
     }
 
 
