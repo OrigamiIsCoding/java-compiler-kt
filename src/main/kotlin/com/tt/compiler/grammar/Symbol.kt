@@ -62,6 +62,10 @@ data class Symbol(
         return this == Empty
     }
 
+    fun isStart(): Boolean {
+        return this == Start
+    }
+
     override fun toString(): String {
         return "Symbol { $value }"
     }

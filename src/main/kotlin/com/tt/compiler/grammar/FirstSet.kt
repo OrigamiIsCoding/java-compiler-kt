@@ -31,6 +31,7 @@ class FirstSet(productions: List<Production>) : HashMap<Symbol, MutableSet<Pair<
     private fun update(productions: List<Production>): Boolean {
         var updated = false
         productions.forEach { production ->
+            // 遍历产生式右边的所有非终结符
             for (rightSymbol in production.right.takeWhile { !it.isTerminal }) {
                 val containEmpty = this[rightSymbol]?.let {
 

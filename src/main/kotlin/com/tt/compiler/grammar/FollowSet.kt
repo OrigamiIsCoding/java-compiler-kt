@@ -4,10 +4,11 @@ package com.tt.compiler.grammar
  * @author Origami
  * @date 4/20/2023 12:11 PM
  */
-class FollowSet(firstSet: FirstSet, productions: List<Production>) :
-    HashMap<Symbol, MutableSet<Symbol>>() {
-    init {
-        // 往 Follow(Start) 加入 $
+class FollowSet :
+    HashMap<Symbol, MutableSet<Symbol>> {
+    constructor() : super()
+
+    constructor(firstSet: FirstSet, productions: List<Production>) : super() {
         this[Symbol.Start] = mutableSetOf(Symbol.End)
         while (true) {
             if (!this.update(firstSet, productions)) {
@@ -69,5 +70,11 @@ class FollowSet(firstSet: FirstSet, productions: List<Production>) :
         return "FollowSet {\n" + this.map {
             "\t${it.key} => ${it.value}"
         }.joinToString("\n") + "\n}"
+    }
+
+    companion object {
+        fun empty(): FollowSet {
+            return FollowSet()
+        }
     }
 }

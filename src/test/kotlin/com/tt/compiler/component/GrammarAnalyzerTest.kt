@@ -5,6 +5,14 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+val TestGrammar1 = """
+    S  -> T S'
+    S' -> + T S' | ε
+    T  -> F T'
+    T' -> * F T' | ε
+    F  -> ( S ) | id
+""".trimIndent()
+
 /**
  * @author Origami
  * @date 4/19/2023 5:19 PM
@@ -44,15 +52,7 @@ class GrammarAnalyzerTest {
 
     @Test
     fun testFirstSet() {
-        val productions = grammar(
-            """
-            S  -> T S'
-            S' -> + T S' | ε
-            T  -> F T'
-            T' -> * F T' | ε
-            F  -> ( S ) | id
-        """.trimIndent()
-        )
+        val productions = TestGrammar1.toProductions()
 
         val firstSet = FirstSet(productions)
         assertEquals(mapOf(
@@ -66,15 +66,7 @@ class GrammarAnalyzerTest {
 
     @Test
     fun testFollowSet() {
-        val productions = grammar(
-            """
-            S  -> T S'
-            S' -> + T S' | ε
-            T  -> F T'
-            T' -> * F T' | ε
-            F  -> ( S ) | id
-        """.trimIndent()
-        )
+        val productions = TestGrammar1.toProductions()
 
         val firstSet = FirstSet(productions)
         val followSet = FollowSet(firstSet, productions)
@@ -91,15 +83,7 @@ class GrammarAnalyzerTest {
 
     @Test
     fun testLLOneParsingTable() {
-        val productions = grammar(
-            """
-            S  -> T S'
-            S' -> + T S' | ε
-            T  -> F T'
-            T' -> * F T' | ε
-            F  -> ( S ) | id
-        """.trimIndent()
-        )
+        val productions = TestGrammar1.toProductions()
 
         val firstSet = FirstSet(productions)
         val followSet = FollowSet(firstSet, productions)
@@ -115,7 +99,29 @@ class GrammarAnalyzerTest {
         """.trimIndent(), table.toString()
         )
     }
+
+    @Test
+    fun testSentenceParse() {
+        val grammarAnalyzer = GrammarAnalyzer(TestGrammar1.split("\n"))
+        val productions = grammarAnalyzer.parse("id + id * id")
+        assertEquals(
+            listOf(
+                "S -> T S'",
+                "T -> F T'",
+                "F -> id",
+                "T' -> ε",
+                "S' -> + T S'",
+                "T -> F T'",
+                "F -> id",
+                "T' -> * F T'",
+                "F -> id",
+                "T' -> ε",
+                "S' -> ε",
+            ).map { Production.parse(it).first() },
+            productions
+        )
+    }
 }
 
 fun s(value: String) = Symbol.from(value)
-fun grammar(text: String) = text.split("\n").flatMap(Production::parse)
+fun String.toProductions() = this.split("\n").flatMap(Production::parse)
