@@ -29,7 +29,7 @@ class FollowSet :
             // 倒序遍历产生式的右部
             for (last in rightSymbols.reversed()) {
                 // 如果当前符号是终结符或者和左部相等则退出
-                if (last.isTerminal || left == last) {
+                if (last is Symbol.Terminal || left == last) {
                     break
                 }
                 // 将 Follow(left) 加入到 Follow(last)
@@ -46,16 +46,16 @@ class FollowSet :
             // 遍历产生式的右部，每次取出相邻两项
             // 左边这一项不能是终结符
             for ((current, next) in rightSymbols.zip(rightSymbols.drop(1))
-                .filterNot { it.first.isTerminal }) {
+                .filterNot { it.first is Symbol.Terminal }) {
 
                 val currentFollow = this.getOrPut(current) { mutableSetOf() }
-                when (next.isTerminal) {
+                when (next) {
                     // 下一项是终结符，则加入到 Follow(current) 中
-                    true -> {
+                    is Symbol.Terminal -> {
                         updated = updated || currentFollow.add(next)
                     }
                     // 下一项是非终结符，将 {First(next) - 空串} 加入到 Follow(current)
-                    false -> {
+                    is Symbol.NonTerminal -> {
                         firstSet[next]?.map { it.first }?.let {
                             updated = updated || currentFollow.addAll(it.filterNot(Symbol::isEmpty))
                         }

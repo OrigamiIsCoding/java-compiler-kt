@@ -11,7 +11,11 @@ data class Production(
     val right: List<Symbol>
 ) {
     companion object {
-        private const val Separator = "->"
+        val ExtendedProduction = Production(
+            left = Symbol.ExtendedStart,
+            right = listOf(Symbol.Start)
+        )
+        const val Separator = "->"
         private const val Or = "|"
 
         /**
@@ -27,7 +31,7 @@ data class Production(
             // 获取产生式的左部
             val left = tokens.first()
                 .let(Symbol::from)
-                .takeIf { !it.isTerminal } ?: throw IllegalGrammarSymbolException("产生式左部必须是非终结符")
+                .takeIf { it is Symbol.NonTerminal } ?: throw IllegalGrammarSymbolException("产生式左部必须是非终结符")
             // 获取产生式的右部，然后按照 | 分割，最后按照空格分割
             return tokens.drop(2)
                 .joinToString(" ")
@@ -50,6 +54,5 @@ data class Production(
     fun toExpression(): String {
         return "${left.value} $Separator ${right.map(Symbol::value).joinToString(" ")}"
     }
-
 
 }

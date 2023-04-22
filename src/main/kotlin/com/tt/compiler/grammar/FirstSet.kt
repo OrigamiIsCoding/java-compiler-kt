@@ -9,7 +9,7 @@ class FirstSet(productions: List<Production>) : HashMap<Symbol, MutableSet<Pair<
         // 第一次先将 right 的第一个为终结符的加入到 First(left) 中
         productions.forEach { production ->
             production.right.take(1)
-                .firstOrNull(Symbol::isTerminal)?.let {
+                .firstOrNull { it is Symbol.Terminal }?.let {
                     this.getOrPut(production.left) { mutableSetOf() }
                         .add(it to production)
                 }
@@ -32,7 +32,7 @@ class FirstSet(productions: List<Production>) : HashMap<Symbol, MutableSet<Pair<
         var updated = false
         productions.forEach { production ->
             // 遍历产生式右边的所有非终结符
-            for (rightSymbol in production.right.takeWhile { !it.isTerminal }) {
+            for (rightSymbol in production.right.takeWhile { it is Symbol.NonTerminal }) {
                 val containEmpty = this[rightSymbol]?.let {
 
                     // 将 First(rightSymbol) 加入到 First(left)

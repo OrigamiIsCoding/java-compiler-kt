@@ -1,5 +1,6 @@
 package com.tt.compiler.component
 
+import com.tt.compiler.component.impl.GrammarAnalyzerLLOneImpl
 import com.tt.compiler.grammar.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -17,7 +18,7 @@ val TestGrammar1 = """
  * @author Origami
  * @date 4/19/2023 5:19 PM
  */
-class GrammarAnalyzerTest {
+class GrammarAnalyzerLLOneImplTest {
 
     @BeforeTest
     fun setUp() {
@@ -102,8 +103,8 @@ class GrammarAnalyzerTest {
 
     @Test
     fun testSentenceParse() {
-        val grammarAnalyzer = GrammarAnalyzer(TestGrammar1.split("\n"))
-        val productions = grammarAnalyzer.parse("id + id * id")
+        val grammarAnalyzerLLOneImpl = GrammarAnalyzerLLOneImpl(TestGrammar1.split("\n"))
+        val productions = grammarAnalyzerLLOneImpl.analyze("id + id * id")
         assertEquals(
             listOf(
                 "S -> T S'",

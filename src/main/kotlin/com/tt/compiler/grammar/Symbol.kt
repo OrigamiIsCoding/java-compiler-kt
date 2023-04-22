@@ -6,25 +6,41 @@ import com.tt.compiler.exception.IllegalGrammarSymbolException
  * @author Origami
  * @date 4/18/2023 7:59 PM
  */
-data class Symbol(
-    val value: String,
-    val isTerminal: Boolean
+sealed class Symbol(
+    val value: String
 ) {
+    class Terminal(value: String) : Symbol(value) {
+        override fun toString(): String {
+            return "Terminal { $value }"
+        }
+    }
+
+    class NonTerminal(value: String) : Symbol(value) {
+        override fun toString(): String {
+            return "NonTerminal { $value }"
+        }
+    }
+
     companion object {
         /**
          * 语法的结尾符号
          */
-        val End = Symbol("$", true)
+        val End = Terminal("$")
 
         /**
          * 空串
          */
-        val Empty = Symbol("ε", true)
+        val Empty = Terminal("ε")
 
         /**
          * 开始符号
          */
-        val Start = Symbol("S", false)
+        val Start = NonTerminal("S")
+
+        /**
+         * 拓广文法的开始符号
+         */
+        val ExtendedStart = NonTerminal("S'")
 
         fun from(value: String): Symbol {
             return value.trim().ifBlank {
@@ -34,7 +50,8 @@ data class Symbol(
                     End.value -> End
                     Empty.value -> Empty
                     Start.value -> Start
-                    else -> Symbol(value, checkIsTerminal(it))
+                    ExtendedStart.value -> ExtendedStart
+                    else -> if (checkIsTerminal(it)) Terminal(it) else NonTerminal(it)
                 }
             }
         }
