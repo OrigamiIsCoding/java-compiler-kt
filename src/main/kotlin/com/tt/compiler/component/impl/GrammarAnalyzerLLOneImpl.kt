@@ -19,7 +19,7 @@ class GrammarAnalyzerLLOneImpl(lines: List<String>) : GrammarAnalyzer(lines) {
     private val followSet: FollowSet = if (firstSet.values.flatten().map { it.first }.contains(Symbol.Empty)) {
         FollowSet(firstSet, productions)
     } else {
-        FollowSet.empty()
+        FollowSet.Empty
     }
 
     private val parsingTable: LLOneParsingTable = LLOneParsingTable(firstSet, followSet)

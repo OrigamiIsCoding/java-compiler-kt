@@ -6,6 +6,9 @@ import com.tt.compiler.exception.IllegalGrammarSymbolException
  * @author Origami
  * @date 4/18/2023 7:59 PM
  */
+typealias Terminal = Symbol.Terminal
+typealias NonTerminal = Symbol.NonTerminal
+
 sealed class Symbol(
     val value: String
 ) {

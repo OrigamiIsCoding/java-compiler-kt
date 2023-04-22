@@ -4,68 +4,13 @@ package com.tt.compiler.grammar
  * @author Origami
  * @date 4/20/2023 12:11 PM
  */
-class FollowSet :
-    HashMap<Symbol.NonTerminal, MutableSet<Symbol.Terminal>> {
-    constructor() : super()
+private typealias ImmutableFollowSet = Map<NonTerminal, Set<Terminal>>
+private typealias MutableFollowSet = MutableMap<NonTerminal, MutableSet<Terminal>>
 
-    constructor(firstSet: FirstSet, productions: List<Production>) : super() {
-        this[Symbol.Start] = mutableSetOf(Symbol.End)
-        while (true) {
-            if (!this.update(firstSet, productions)) {
-                break
-            }
-        }
-    }
-
-    /**
-     * 遍历一遍产生式更新现有的 FollowSet
-     * @param firstSet FirstSet
-     * @param productions 产生式
-     * @return 如果更新成功返回 true，否则返回 false
-     */
-    private fun update(firstSet: FirstSet, productions: List<Production>): Boolean {
-        var updated = false
-        productions.forEach { (left, rightSymbols) ->
-            // 倒序遍历产生式的右部
-            for (last in rightSymbols.reversed()) {
-                when (last) {
-                    // 如果当前符号是终结符或者和左部相等则退出
-                    is Symbol.Terminal -> break
-                    left -> break
-                    is Symbol.NonTerminal -> {
-                        // 将 Follow(left) 加入到 Follow(last)
-                        this[left]?.let {
-                            updated = updated || this.getOrPut(last) { mutableSetOf() }.addAll(it)
-                        }
-                        // 如果 First(last) 包含空，则继续循环
-                        if (firstSet[last]?.any { it.first.isEmpty() } != true) {
-                            break
-                        }
-                    }
-                }
-            }
-
-            // 遍历产生式的右部，每次取出相邻两项
-            // 左边这一项不能是终结符
-            for ((current, next) in rightSymbols.zip(rightSymbols.drop(1))
-                .filter { it.first is Symbol.NonTerminal }) {
-
-                val currentFollow = this.getOrPut(current as Symbol.NonTerminal) { mutableSetOf() }
-                when (next) {
-                    // 下一项是终结符，则加入到 Follow(current) 中
-                    is Symbol.Terminal -> {
-                        updated = updated || currentFollow.add(next)
-                    }
-                    // 下一项是非终结符，将 {First(next) - 空串} 加入到 Follow(current)
-                    is Symbol.NonTerminal -> {
-                        firstSet[next]?.map { it.first }?.let {
-                            updated = updated || currentFollow.addAll(it.filterNot(Symbol::isEmpty))
-                        }
-                    }
-                }
-            }
-        }
-        return updated
+class FollowSet(firstSet: FirstSet, productions: List<Production>) :
+    ImmutableFollowSet by buildFollowSet(firstSet, productions) {
+    companion object {
+        val Empty = FollowSet(FirstSet.Empty, emptyList())
     }
 
     override fun toString(): String {
@@ -73,10 +18,69 @@ class FollowSet :
             "\t${it.key} => ${it.value}"
         }.joinToString("\n") + "\n}"
     }
+}
 
-    companion object {
-        fun empty(): FollowSet {
-            return FollowSet()
+private fun buildFollowSet(firstSet: FirstSet, productions: List<Production>): Map<NonTerminal, Set<Terminal>> {
+    if (productions.isEmpty()) {
+        return emptyMap()
+    }
+    val map = mutableMapOf<NonTerminal, MutableSet<Terminal>>()
+    map[Symbol.Start] = mutableSetOf(Symbol.End)
+    while (true) {
+        if (!map.update(firstSet, productions)) {
+            break
         }
     }
+    return map.mapValues { it.value.toSet() }
+}
+
+/**
+ * 遍历一遍产生式更新现有的 FollowSet
+ * @param firstSet FirstSet
+ * @param productions 产生式
+ * @return 如果更新成功返回 true，否则返回 false
+ */
+private fun MutableFollowSet.update(firstSet: FirstSet, productions: List<Production>): Boolean {
+    var updated = false
+    productions.forEach { (left, rightSymbols) ->
+        // 倒序遍历产生式的右部
+        for (last in rightSymbols.reversed()) {
+            when (last) {
+                // 如果当前符号是终结符或者和左部相等则退出
+                is Symbol.Terminal -> break
+                left -> break
+                is Symbol.NonTerminal -> {
+                    // 将 Follow(left) 加入到 Follow(last)
+                    this[left]?.let {
+                        updated = updated || this.getOrPut(last) { mutableSetOf() }.addAll(it)
+                    }
+                    // 如果 First(last) 包含空，则继续循环
+                    if (firstSet[last]?.any { it.first.isEmpty() } != true) {
+                        break
+                    }
+                }
+            }
+        }
+
+        // 遍历产生式的右部，每次取出相邻两项
+        // 左边这一项不能是终结符
+        for ((current, next) in rightSymbols.zip(rightSymbols.drop(1))
+            .filter { it.first is Symbol.NonTerminal }) {
+
+            val currentFollow = this.getOrPut(current as Symbol.NonTerminal) { mutableSetOf() }
+            when (next) {
+                // 下一项是终结符，则加入到 Follow(current) 中
+                is Symbol.Terminal -> {
+                    updated = updated || currentFollow.add(next)
+                }
+                // 下一项是非终结符，将 {First(next) - 空串} 加入到 Follow(current)
+                is Symbol.NonTerminal -> {
+                    firstSet[next]?.map { it.first }?.let {
+                        updated = updated || currentFollow.addAll(it.filterNot(Symbol::isEmpty))
+                    }
+                }
+            }
+        }
+    }
+    return updated
 }
