@@ -7,7 +7,7 @@ import com.tt.compiler.exception.IllegalGrammarSymbolException
  * @date 4/18/2023 8:12 PM
  */
 data class Production(
-    val left: Symbol,
+    val left: Symbol.NonTerminal,
     val right: List<Symbol>
 ) {
     companion object {
@@ -38,7 +38,7 @@ data class Production(
                 .split(Or)
                 .map {
                     Production(
-                        left = left,
+                        left = left as Symbol.NonTerminal,
                         right = it.split(" ").filter(String::isNotBlank).map(Symbol::from).ifEmpty {
                             throw IllegalGrammarSymbolException("产生式右部不能为空")
                         }

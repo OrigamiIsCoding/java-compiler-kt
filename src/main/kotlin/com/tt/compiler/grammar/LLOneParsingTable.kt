@@ -5,10 +5,10 @@ package com.tt.compiler.grammar
  * @date 4/20/2023 5:51 PM
  */
 class LLOneParsingTable(firstSet: FirstSet, followSet: FollowSet) :
-    HashMap<Symbol, Map<Symbol, Production>>() {
+    HashMap<Symbol.NonTerminal, Map<Symbol.Terminal, Production>>() {
     init {
         firstSet.forEach { (left, leftFirstSet) ->
-            val leftMap = mutableMapOf<Symbol, Production>()
+            val leftMap = mutableMapOf<Symbol.Terminal, Production>()
             leftFirstSet.forEach { (first, production) ->
                 if (first.isEmpty()) {
                     // 如果当前符号是空串，像表中添加 symbol -> 空串, symbol 属于 Follow(left)
@@ -29,7 +29,7 @@ class LLOneParsingTable(firstSet: FirstSet, followSet: FollowSet) :
      * | ...   |          |
      */
     override fun toString(): String {
-        val terminalSymbols = this.values.flatMap { it.keys }
+        val terminalSymbols = this.values.flatMap { it.keys }.distinctBy { it.value }
         val nonTerminalSymbols = this.keys
         val maxWidth = maxOf(
             terminalSymbols.maxOf { it.value.length },

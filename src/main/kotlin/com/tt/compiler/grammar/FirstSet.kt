@@ -4,14 +4,15 @@ package com.tt.compiler.grammar
  * @author Origami
  * @date 4/19/2023 8:58 AM
  */
-class FirstSet(productions: List<Production>) : HashMap<Symbol, MutableSet<Pair<Symbol, Production>>>() {
+class FirstSet(productions: List<Production>) :
+    HashMap<Symbol.NonTerminal, MutableSet<Pair<Symbol.Terminal, Production>>>() {
     init {
         // 第一次先将 right 的第一个为终结符的加入到 First(left) 中
         productions.forEach { production ->
             production.right.take(1)
                 .firstOrNull { it is Symbol.Terminal }?.let {
                     this.getOrPut(production.left) { mutableSetOf() }
-                        .add(it to production)
+                        .add(it as Symbol.Terminal to production)
                 }
         }
 

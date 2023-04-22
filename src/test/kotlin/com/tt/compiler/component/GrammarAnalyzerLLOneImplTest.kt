@@ -28,7 +28,7 @@ class GrammarAnalyzerLLOneImplTest {
     fun testProductionParse() {
         assertEquals(
             Production(
-                left = s("S"),
+                left = nt("S"),
                 right = listOf(
                     s("T"), s("S'")
                 )
@@ -39,11 +39,11 @@ class GrammarAnalyzerLLOneImplTest {
         assertEquals(
             listOf(
                 Production(
-                    left = s("S'"),
+                    left = nt("S'"),
                     right = listOf(s("+"), s("T"), s("S'"))
                 ),
                 Production(
-                    left = s("S'"),
+                    left = nt("S'"),
                     right = listOf(s("ε"))
                 )
             ),
@@ -57,11 +57,11 @@ class GrammarAnalyzerLLOneImplTest {
 
         val firstSet = FirstSet(productions)
         assertEquals(mapOf(
-            s("S") to setOf(s("id"), s("(")),
-            s("S'") to setOf(s("+"), s("ε")),
-            s("T") to setOf(s("id"), s("(")),
-            s("T'") to setOf(s("*"), s("ε")),
-            s("F") to setOf(s("id"), s("("))
+            nt("S") to setOf(s("id"), s("(")),
+            nt("S'") to setOf(s("+"), s("ε")),
+            nt("T") to setOf(s("id"), s("(")),
+            nt("T'") to setOf(s("*"), s("ε")),
+            nt("F") to setOf(s("id"), s("("))
         ), firstSet.mapValues { it -> it.value.map { it.first }.toSet() })
     }
 
@@ -73,11 +73,11 @@ class GrammarAnalyzerLLOneImplTest {
         val followSet = FollowSet(firstSet, productions)
         assertEquals(
             mapOf(
-                s("S") to setOf(s("$"), s(")")),
-                s("S'") to setOf(s("$"), s(")")),
-                s("T") to setOf(s("$"), s("+"), s(")")),
-                s("T'") to setOf(s("$"), s("+"), s(")")),
-                s("F") to setOf(s("$"), s("+"), s("*"), s(")"))
+                nt("S") to setOf(s("$"), s(")")),
+                nt("S'") to setOf(s("$"), s(")")),
+                nt("T") to setOf(s("$"), s("+"), s(")")),
+                nt("T'") to setOf(s("$"), s("+"), s(")")),
+                nt("F") to setOf(s("$"), s("+"), s("*"), s(")"))
             ), followSet
         )
     }
@@ -89,15 +89,39 @@ class GrammarAnalyzerLLOneImplTest {
         val firstSet = FirstSet(productions)
         val followSet = FollowSet(firstSet, productions)
         val table = LLOneParsingTable(firstSet, followSet)
+
         assertEquals(
-            """
-            |              | (            | id           | *            | ${'$'}            | +            | )            | (            | id           | +            | ${'$'}            | )            | (            | id           |
-            | F            | F -> ( S )   | F -> id      | null         | null         | null         | null         | F -> ( S )   | F -> id      | null         | null         | null         | F -> ( S )   | F -> id      |
-            | T'           | null         | null         | T' -> * F T' | T' -> ε      | T' -> ε      | T' -> ε      | null         | null         | T' -> ε      | T' -> ε      | T' -> ε      | null         | null         |
-            | T            | T -> F T'    | T -> F T'    | null         | null         | null         | null         | T -> F T'    | T -> F T'    | null         | null         | null         | T -> F T'    | T -> F T'    |
-            | S'           | null         | null         | null         | S' -> ε      | S' -> + T S' | S' -> ε      | null         | null         | S' -> + T S' | S' -> ε      | S' -> ε      | null         | null         |
-            | S            | S -> T S'    | S -> T S'    | null         | null         | null         | null         | S -> T S'    | S -> T S'    | null         | null         | null         | S -> T S'    | S -> T S'    |
-        """.trimIndent(), table.toString()
+            mapOf(
+                t("*") to p("T' -> * F T'"),
+                t("$") to p("T' -> ε"),
+                t("+") to p("T' -> ε"),
+                t(")") to p("T' -> ε"),
+            ), table[nt("T'")]!!
+        )
+        assertEquals(
+            mapOf(
+                t("(") to p("S -> T S'"),
+                t("id") to p("S -> T S'"),
+            ), table[nt("S")]!!
+        )
+        assertEquals(
+            mapOf(
+                t("$") to p("S' -> ε"),
+                t("+") to p("S' -> + T S'"),
+                t(")") to p("S' -> ε"),
+            ), table[nt("S'")]!!
+        )
+        assertEquals(
+            mapOf(
+                t("(") to p("T -> F T'"),
+                t("id") to p("T -> F T'"),
+            ), table[nt("T")]!!
+        )
+        assertEquals(
+            mapOf(
+                t("(") to p("F -> ( S )"),
+                t("id") to p("F -> id"),
+            ), table[nt("F")]!!
         )
     }
 
@@ -125,4 +149,7 @@ class GrammarAnalyzerLLOneImplTest {
 }
 
 fun s(value: String) = Symbol.from(value)
+fun t(value: String) = Symbol.terminal(value)
+fun nt(value: String) = Symbol.nonTerminal(value)
+fun p(value: String) = Production.parse(value).first()
 fun String.toProductions() = this.split("\n").flatMap(Production::parse)

@@ -56,6 +56,16 @@ sealed class Symbol(
             }
         }
 
+        fun terminal(value: String): Terminal {
+            return Terminal(value.notBlank().takeIf { checkIsTerminal(it) }
+                ?: throw IllegalGrammarSymbolException("$value 不满足终结符要求"))
+        }
+
+        fun nonTerminal(value: String): NonTerminal {
+            return NonTerminal(value.notBlank().takeIf { !checkIsTerminal(it) }
+                ?: throw IllegalGrammarSymbolException("$value 不满足非终结符要求"))
+        }
+
         /**
          * 检查是否是终结符
          * @param value 符号
@@ -68,6 +78,12 @@ sealed class Symbol(
                 throw IllegalGrammarSymbolException("终结符和非终结符不能同时包含大写和小写字母")
             }
             return !upper
+        }
+
+        private fun String.notBlank(): String {
+            return this.trim().ifBlank {
+                throw IllegalGrammarSymbolException("终结符和非终结符不能为空")
+            }
         }
     }
 
@@ -85,5 +101,16 @@ sealed class Symbol(
 
     override fun toString(): String {
         return "Symbol { $value }"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Symbol) return false
+
+        return value == other.value && this::class == other::class
+    }
+
+    override fun hashCode(): Int {
+        return value.hashCode()
     }
 }
