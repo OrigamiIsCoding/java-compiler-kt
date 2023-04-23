@@ -43,21 +43,22 @@ class LR0Automaton(
             val state = processQueue.removeFirst()
 
             // 遍历这个状态，需要可以移动的项目
-            state.filter { it.hasNext() }.forEach {
-                // 进行移动
-                val (accept, nextItem) = it.acceptNext()
+            state.filter { it.hasNext() }
+                .groupBy { it.wait } // 根据当前等待的符号进行分组
+                .forEach { (accept, nextItem) ->
+                    val nextState = nextItem
+                        .map { it.next() } // 进行移动
+                        .flatMap { productionMap.closure(it) } // 求可以移动的项目集构成的项目集闭包
+                        .toSet()
 
-                // 求移动后的项目的项目集闭包
-                val nextState = productionMap.closure(nextItem)
-
-                // 判断是否出现在之前状态中，没有就加入
-                if (nextState !in allStates) {
-                    processQueue.addLast(nextState)
-                    allStates[nextState] = Node(nextState)
+                    // 判断是否出现在之前状态中，没有就加入
+                    if (nextState !in allStates) {
+                        processQueue.addLast(nextState)
+                        allStates[nextState] = Node(nextState)
+                    }
+                    // 加入到表中
+                    allStates[state]!![accept!!] = allStates[nextState]!!
                 }
-                // 加入到表中
-                allStates[state]!![accept] = allStates[nextState]!!
-            }
         }
         states = allStates.values.toSet()
     }
@@ -74,6 +75,7 @@ class LR0Automaton(
             return setOf(lr0Item)
         }
 
+        // 项目集
         val itemSets = mutableSetOf(lr0Item)
 
         val processQueue = ArrayDeque<LR0Item>().apply {

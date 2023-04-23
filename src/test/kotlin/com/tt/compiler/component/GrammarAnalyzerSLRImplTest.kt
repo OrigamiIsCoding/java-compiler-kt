@@ -25,7 +25,7 @@ class GrammarAnalyzerSLRImplTest {
     }
 
     @Test
-    fun testLR0Automata() {
+    fun testLR0Automaton2() {
         LR0Automaton(TestGrammar2).apply {
             val state0 = get(
                 lr0s(
@@ -85,6 +85,136 @@ class GrammarAnalyzerSLRImplTest {
             assert(!state4.hasOut())
             assert(!state5.hasOut())
             assert(!state6.hasOut())
+        }
+    }
+
+    @Test
+    fun testLR0Automaton3() {
+        LR0Automaton(TestGrammar3).apply {
+            val state0 = get(
+                lr0s(
+                    "S' -> · S",
+                    "S -> · S + T",
+                    "S -> · T",
+                    "T -> · T * F",
+                    "T -> · F",
+                    "F -> · ( S )",
+                    "F -> · id"
+                )
+            )!!
+            val state1 = get(
+                lr0s(
+                    "S' -> S ·",
+                    "S -> S · + T"
+                )
+            )!!
+            val state2 = get(
+                lr0s(
+                    "S -> T ·",
+                    "T -> T · * F",
+                )
+            )!!
+            val state3 = get(
+                lr0s("T -> F ·")
+            )!!
+            val state4 = get(
+                lr0s(
+                    "F -> ( · S )",
+                    "S -> · S + T",
+                    "S -> · T",
+                    "T -> · T * F",
+                    "T -> · F",
+                    "F -> · ( S )",
+                    "F -> · id"
+                )
+            )!!
+            val state5 = get(
+                lr0s("F -> id ·")
+            )!!
+            val state6 = get(
+                lr0s(
+                    "S -> S + · T",
+                    "T -> · T * F",
+                    "T -> · F",
+                    "F -> · ( S )",
+                    "F -> · id"
+                )
+            )!!
+            val state7 = get(
+                lr0s(
+                    "T -> T * · F",
+                    "F -> · ( S )",
+                    "F -> · id"
+                )
+            )!!
+            val state8 = get(
+                lr0s(
+                    "F -> ( S · )",
+                    "S -> S · + T",
+                )
+            )!!
+            val state9 = get(
+                lr0s(
+                    "S -> S + T ·",
+                    "T -> T · * F",
+                )
+            )!!
+            val state10 = get(
+                lr0s("T -> T * F ·")
+            )!!
+            val state11 = get(
+                lr0s("F -> ( S ) ·")
+            )!!
+
+            state0.apply {
+                assertEquals(get(nt("S"))!!, state1)
+                assertEquals(get(nt("T"))!!, state2)
+                assertEquals(get(nt("F"))!!, state3)
+                assertEquals(get(t("("))!!, state4)
+                assertEquals(get(t("id"))!!, state5)
+            }
+
+            state1.apply {
+                assertEquals(get(t("+"))!!, state6)
+            }
+
+            state2.apply {
+                assertEquals(get(t("*"))!!, state7)
+            }
+
+            state4.apply {
+                assertEquals(get(nt("T"))!!, state2)
+                assertEquals(get(nt("F"))!!, state3)
+                assertEquals(get(t("id"))!!, state5)
+                assertEquals(get(t("("))!!, state4)
+            }
+
+            state6.apply {
+                assertEquals(get(nt("T"))!!, state9)
+                assertEquals(get(nt("F"))!!, state3)
+                assertEquals(get(t("id"))!!, state5)
+                assertEquals(get(t("("))!!, state4)
+            }
+
+            state7.apply {
+                assertEquals(get(nt("F"))!!, state10)
+                assertEquals(get(t("id"))!!, state5)
+                assertEquals(get(t("("))!!, state4)
+            }
+
+            state8.apply {
+                assertEquals(get(t(")"))!!, state11)
+                assertEquals(get(t("+"))!!, state6)
+            }
+
+            state9.apply {
+                assertEquals(get(t("*"))!!, state7)
+            }
+
+            assert(!state3.hasOut())
+            assert(!state5.hasOut())
+            assert(!state10.hasOut())
+            assert(!state11.hasOut())
         }
     }
 }

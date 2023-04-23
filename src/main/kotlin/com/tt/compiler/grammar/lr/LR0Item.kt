@@ -30,13 +30,6 @@ data class LR0Item(
         return LR0Item(production, dot + 1)
     }
 
-    fun acceptNext(): Pair<Symbol, LR0Item> {
-        if (!hasNext()) {
-            throw NoSuchElementException()
-        }
-        return Pair(production.right[dot], LR0Item(production, dot + 1))
-    }
-
     /**
      * 当前项目在等待的符号
      */

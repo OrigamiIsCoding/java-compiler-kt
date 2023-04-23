@@ -23,6 +23,15 @@ val TestGrammar2 = """
     B -> b
 """.trimIndent().parse()
 
+val TestGrammar3 = """
+    S -> S + T
+    S -> T
+    T -> T * F
+    T -> F
+    F -> ( S )
+    F -> id
+""".trimIndent().parse()
+
 fun s(value: String) = Symbol.from(value)
 fun t(value: String) = Symbol.terminal(value)
 fun nt(value: String) = Symbol.nonTerminal(value)
