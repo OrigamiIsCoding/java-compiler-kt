@@ -14,18 +14,14 @@ class GrammarAnalyzerLL1Impl : GrammarAnalyzer {
     constructor(inputGrammar: String) : super(inputGrammar)
     constructor(grammar: Grammar) : super(grammar)
 
-    // 构建 FirstSet、FollowSet、LL(1) Table
-    private val firstSet: FirstSet = FirstSet(grammar)
-
-
-    // 只有当 FirstSet 中包括空串时，才需要构建 FollowSet
-    private val followSet: FollowSet = if (firstSet.values.flatten().map { it.first }.contains(Symbol.Empty)) {
-        FollowSet(firstSet, grammar)
-    } else {
-        FollowSet.Empty
+    init {
+        // 构建 FirstSet、FollowSet、LL(1) Table
+        val firstSet = FirstSet.from(grammar)
+        val followSet = FollowSet.from(firstSet, grammar)
+        parseTable = LL1ParseTable(firstSet, followSet)
     }
 
-    private val parseTable: LL1ParseTable = LL1ParseTable(firstSet, followSet)
+    private val parseTable: LL1ParseTable
 
     override fun analyze(sentence: String): List<Production> {
         // 输入的句子符号

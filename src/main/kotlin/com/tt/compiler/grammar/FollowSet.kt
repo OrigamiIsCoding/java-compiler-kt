@@ -7,10 +7,19 @@ package com.tt.compiler.grammar
 private typealias ImmutableFollowSet = Map<NonTerminal, Set<Terminal>>
 private typealias MutableFollowSet = MutableMap<NonTerminal, MutableSet<Terminal>>
 
-class FollowSet(firstSet: FirstSet, grammar: Grammar) :
+class FollowSet private constructor(firstSet: FirstSet, grammar: Grammar) :
     ImmutableFollowSet by buildFollowSet(firstSet, grammar) {
     companion object {
         val Empty = FollowSet(FirstSet.Empty, Grammar.Empty)
+
+        fun from(firstSet: FirstSet, grammar: Grammar): FollowSet {
+            // 只有当 FirstSet 中包括空串时，才需要构建 FollowSet
+            return if (firstSet.values.flatten().map { it.first }.contains(Symbol.Empty)) {
+                FollowSet(firstSet, grammar)
+            } else {
+                Empty
+            }
+        }
 
         /**
          * 构建 FollowSet

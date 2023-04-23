@@ -48,7 +48,7 @@ class GrammarAnalyzerLL1ImplTest {
     fun testFirstSet() {
         val productions = TestGrammar1
 
-        val firstSet = FirstSet(productions)
+        val firstSet = FirstSet.from(productions)
         assertEquals(mapOf(
             nt("S") to setOf(s("id"), s("(")),
             nt("S'") to setOf(s("+"), s("ε")),
@@ -62,8 +62,8 @@ class GrammarAnalyzerLL1ImplTest {
     fun testFollowSet() {
         val productions = TestGrammar1
 
-        val firstSet = FirstSet(productions)
-        val followSet = FollowSet(firstSet, productions)
+        val firstSet = FirstSet.from(productions)
+        val followSet = FollowSet.from(firstSet, productions)
         assertEquals(
             mapOf(
                 nt("S") to setOf(s("$"), s(")")),
@@ -79,8 +79,8 @@ class GrammarAnalyzerLL1ImplTest {
     fun testLL1ParseTable() {
         val productions = TestGrammar1
 
-        val firstSet = FirstSet(productions)
-        val followSet = FollowSet(firstSet, productions)
+        val firstSet = FirstSet.from(productions)
+        val followSet = FollowSet.from(firstSet, productions)
         val table = LL1ParseTable(firstSet, followSet)
 
         assertEquals(

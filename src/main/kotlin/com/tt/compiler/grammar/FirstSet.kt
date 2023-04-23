@@ -10,10 +10,18 @@ package com.tt.compiler.grammar
 private typealias ImmutableFirstSetMap = Map<NonTerminal, Set<Pair<Terminal, Production>>>
 private typealias MutableFirstSetMap = MutableMap<NonTerminal, MutableSet<Pair<Terminal, Production>>>
 
-class FirstSet(grammar: Grammar) :
+class FirstSet private constructor(grammar: Grammar) :
     ImmutableFirstSetMap by buildFirstSet(grammar) {
     companion object {
         val Empty = FirstSet(Grammar.Empty)
+
+        fun from(grammar: Grammar): FirstSet {
+            return if (grammar.isEmpty()) {
+                Empty
+            } else {
+                FirstSet(grammar)
+            }
+        }
 
         /**
          * 构建 FirstSet
