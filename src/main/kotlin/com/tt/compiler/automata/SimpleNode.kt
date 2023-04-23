@@ -12,7 +12,7 @@ data class SimpleNode<T, Accept>(
     /**
      * 节点的子节点
      */
-    val next: MutableMap<Accept, SimpleNode<T, Accept>> = mutableMapOf()
+    private val next: MutableMap<Accept, SimpleNode<T, Accept>> = mutableMapOf()
 ) : MutableMap<Accept, SimpleNode<T, Accept>> by next {
 
     fun hasOut(): Boolean {
