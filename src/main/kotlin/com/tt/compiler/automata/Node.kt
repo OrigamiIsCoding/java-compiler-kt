@@ -12,7 +12,7 @@ sealed class Node<T, Accept>(
     /**
      * 节点的子节点
      */
-    val next: MutableMap<Accept, Node<T, Accept>>
+    private val next: MutableMap<Accept, Node<T, Accept>>
 ) {
     class Accept<T, Accept>(
         value: T,
