@@ -63,12 +63,12 @@ class GrammarAnalyzerLLOneImpl(lines: List<String>) : GrammarAnalyzer(lines) {
                         // 将产生式的右部压入栈中
                         it.right.reversed().forEach(stack::push)
                     }
-                } ?: throw IllegalGrammarSymbolException("输入的句子 $sentence 不符合文法")
+                } ?: throw IllegalGrammarSymbolException("输入的句子 $sentence 不符合该文法")
             }
         }
 
         if (stack.isNotEmpty() || inputIndex < inputSymbols.size) {
-            throw IllegalGrammarSymbolException("输入的句子 $sentence 不符合文法")
+            throw IllegalGrammarSymbolException("输入的句子 $sentence 不符合该文法")
         }
 
         return parseProductions

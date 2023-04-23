@@ -7,7 +7,7 @@ import com.tt.compiler.exception.IllegalGrammarSymbolException
  * @date 4/18/2023 8:12 PM
  */
 data class Production(
-    val left: Symbol.NonTerminal,
+    val left: NonTerminal,
     val right: List<Symbol>
 ) {
     companion object {
@@ -31,14 +31,14 @@ data class Production(
             // 获取产生式的左部
             val left = tokens.first()
                 .let(Symbol::from)
-                .takeIf { it is Symbol.NonTerminal } ?: throw IllegalGrammarSymbolException("产生式左部必须是非终结符")
+                .takeIf { it is NonTerminal } ?: throw IllegalGrammarSymbolException("产生式左部必须是非终结符")
             // 获取产生式的右部，然后按照 | 分割，最后按照空格分割
             return tokens.drop(2)
                 .joinToString(" ")
                 .split(Or)
                 .map {
                     Production(
-                        left = left as Symbol.NonTerminal,
+                        left = left as NonTerminal,
                         right = it.split(" ").filter(String::isNotBlank).map(Symbol::from).ifEmpty {
                             throw IllegalGrammarSymbolException("产生式右部不能为空")
                         }

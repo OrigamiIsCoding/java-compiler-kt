@@ -24,5 +24,8 @@ class GrammarAnalyzerSLRImpl(lines: List<String>) : GrammarAnalyzer(lines) {
 
     private fun List<Production>.buildLRZeroItems() {
         val itemSets = mutableSetOf(LRZeroItem(Production.ExtendedProduction))
+        val productionMap = this.groupBy(Production::left)
+        val queue = ArrayDeque<LRZeroItem>()
+        TODO()
     }
 }
