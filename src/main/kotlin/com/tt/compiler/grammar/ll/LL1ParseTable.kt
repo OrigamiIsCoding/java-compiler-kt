@@ -1,6 +1,7 @@
-package com.tt.compiler.grammar
+package com.tt.compiler.grammar.ll
 
 import com.tt.compiler.exception.IllegalGrammarSymbolException
+import com.tt.compiler.grammar.*
 
 /**
  * @author Origami
@@ -10,7 +11,7 @@ import com.tt.compiler.exception.IllegalGrammarSymbolException
 private typealias ImmutableLLOneParsingTable = Map<NonTerminal, Map<Terminal, Production>>
 
 
-class LLOneParsingTable(firstSet: FirstSet, followSet: FollowSet) :
+class LL1ParseTable(firstSet: FirstSet, followSet: FollowSet) :
     ImmutableLLOneParsingTable by buildLLOneParsingTable(firstSet, followSet) {
     companion object {
         /**

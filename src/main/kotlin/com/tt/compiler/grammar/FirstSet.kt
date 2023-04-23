@@ -10,20 +10,20 @@ package com.tt.compiler.grammar
 private typealias ImmutableFirstSetMap = Map<NonTerminal, Set<Pair<Terminal, Production>>>
 private typealias MutableFirstSetMap = MutableMap<NonTerminal, MutableSet<Pair<Terminal, Production>>>
 
-class FirstSet(productions: List<Production>) :
-    ImmutableFirstSetMap by buildFirstSet(productions) {
+class FirstSet(grammar: Grammar) :
+    ImmutableFirstSetMap by buildFirstSet(grammar) {
     companion object {
-        val Empty = FirstSet(emptyList())
+        val Empty = FirstSet(Grammar.Empty)
 
         /**
          * 构建 FirstSet
-         * @param productions 产生式
+         * @param grammar 产生式
          * @return FirstSet
          */
-        private fun buildFirstSet(productions: List<Production>): ImmutableFirstSetMap {
+        private fun buildFirstSet(grammar: Grammar): ImmutableFirstSetMap {
             val map = mutableMapOf<NonTerminal, MutableSet<Pair<Terminal, Production>>>()
             // 第一次先将 right 的第一个为终结符的加入到 First(left) 中
-            productions.forEach { production ->
+            grammar.forEach { production ->
                 production.right.take(1)
                     .firstOrNull { it is Terminal }?.let {
                         map.getOrPut(production.left) { mutableSetOf() }
@@ -33,7 +33,7 @@ class FirstSet(productions: List<Production>) :
 
             while (true) {
                 // 如果更新成功则需要再次更新
-                if (!map.update(productions)) {
+                if (!map.update(grammar)) {
                     break
                 }
             }
@@ -42,12 +42,12 @@ class FirstSet(productions: List<Production>) :
 
         /**
          * 遍历一遍产生式更新现有的 FirstSet
-         * @param productions 产生式
+         * @param grammar 产生式
          * @return 如果更新成功返回 true，否则返回 false
          */
-        private fun MutableFirstSetMap.update(productions: List<Production>): Boolean {
+        private fun MutableFirstSetMap.update(grammar: Grammar): Boolean {
             var updated = false
-            productions.forEach { production ->
+            grammar.forEach { production ->
                 // 遍历产生式右边的所有非终结符
                 for (rightSymbol in production.right.takeWhile { it is Symbol.NonTerminal }) {
                     val containEmpty = this[rightSymbol]?.let {

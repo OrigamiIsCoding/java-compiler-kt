@@ -1,7 +1,8 @@
 package com.tt.compiler.component
 
-import com.tt.compiler.component.impl.GrammarAnalyzerLLOneImpl
+import com.tt.compiler.component.impl.GrammarAnalyzerLL1Impl
 import com.tt.compiler.grammar.*
+import com.tt.compiler.grammar.ll.LL1ParseTable
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -12,13 +13,13 @@ val TestGrammar1 = """
     T  -> F T'
     T' -> * F T' | ε
     F  -> ( S ) | id
-""".trimIndent()
+""".trimIndent().parse()
 
 /**
  * @author Origami
  * @date 4/19/2023 5:19 PM
  */
-class GrammarAnalyzerLLOneImplTest {
+class GrammarAnalyzerLL1ImplTest {
 
     @BeforeTest
     fun setUp() {
@@ -53,7 +54,7 @@ class GrammarAnalyzerLLOneImplTest {
 
     @Test
     fun testFirstSet() {
-        val productions = TestGrammar1.toProductions()
+        val productions = TestGrammar1
 
         val firstSet = FirstSet(productions)
         assertEquals(mapOf(
@@ -67,7 +68,7 @@ class GrammarAnalyzerLLOneImplTest {
 
     @Test
     fun testFollowSet() {
-        val productions = TestGrammar1.toProductions()
+        val productions = TestGrammar1
 
         val firstSet = FirstSet(productions)
         val followSet = FollowSet(firstSet, productions)
@@ -83,12 +84,12 @@ class GrammarAnalyzerLLOneImplTest {
     }
 
     @Test
-    fun testLLOneParsingTable() {
-        val productions = TestGrammar1.toProductions()
+    fun testLL1ParseTable() {
+        val productions = TestGrammar1
 
         val firstSet = FirstSet(productions)
         val followSet = FollowSet(firstSet, productions)
-        val table = LLOneParsingTable(firstSet, followSet)
+        val table = LL1ParseTable(firstSet, followSet)
 
         assertEquals(
             mapOf(
@@ -127,8 +128,8 @@ class GrammarAnalyzerLLOneImplTest {
 
     @Test
     fun testSentenceParse() {
-        val grammarAnalyzerLLOneImpl = GrammarAnalyzerLLOneImpl(TestGrammar1.split("\n"))
-        val productions = grammarAnalyzerLLOneImpl.analyze("id + id * id")
+        val grammarAnalyzerLL1Impl = GrammarAnalyzerLL1Impl(TestGrammar1)
+        val productions = grammarAnalyzerLL1Impl.analyze("id + id * id")
         assertEquals(
             listOf(
                 "S -> T S'",
@@ -152,4 +153,4 @@ fun s(value: String) = Symbol.from(value)
 fun t(value: String) = Symbol.terminal(value)
 fun nt(value: String) = Symbol.nonTerminal(value)
 fun p(value: String) = Production.parse(value).first()
-fun String.toProductions() = this.split("\n").flatMap(Production::parse)
+fun String.parse() = Grammar.parse(this)

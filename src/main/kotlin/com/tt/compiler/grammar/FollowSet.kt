@@ -7,25 +7,25 @@ package com.tt.compiler.grammar
 private typealias ImmutableFollowSet = Map<NonTerminal, Set<Terminal>>
 private typealias MutableFollowSet = MutableMap<NonTerminal, MutableSet<Terminal>>
 
-class FollowSet(firstSet: FirstSet, productions: List<Production>) :
-    ImmutableFollowSet by buildFollowSet(firstSet, productions) {
+class FollowSet(firstSet: FirstSet, grammar: Grammar) :
+    ImmutableFollowSet by buildFollowSet(firstSet, grammar) {
     companion object {
-        val Empty = FollowSet(FirstSet.Empty, emptyList())
+        val Empty = FollowSet(FirstSet.Empty, Grammar.Empty)
 
         /**
          * 构建 FollowSet
          * @param firstSet FirstSet
-         * @param productions 产生式
+         * @param grammar 产生式
          * @return FollowSet
          */
-        private fun buildFollowSet(firstSet: FirstSet, productions: List<Production>): ImmutableFollowSet {
-            if (productions.isEmpty()) {
+        private fun buildFollowSet(firstSet: FirstSet, grammar: Grammar): ImmutableFollowSet {
+            if (grammar.isEmpty()) {
                 return emptyMap()
             }
             val map = mutableMapOf<NonTerminal, MutableSet<Terminal>>()
             map[Symbol.Start] = mutableSetOf(Symbol.End)
             while (true) {
-                if (!map.update(firstSet, productions)) {
+                if (!map.update(firstSet, grammar)) {
                     break
                 }
             }
@@ -35,12 +35,12 @@ class FollowSet(firstSet: FirstSet, productions: List<Production>) :
         /**
          * 遍历一遍产生式更新现有的 FollowSet
          * @param firstSet FirstSet
-         * @param productions 产生式
+         * @param grammar 产生式
          * @return 如果更新成功返回 true，否则返回 false
          */
-        private fun MutableFollowSet.update(firstSet: FirstSet, productions: List<Production>): Boolean {
+        private fun MutableFollowSet.update(firstSet: FirstSet, grammar: Grammar): Boolean {
             var updated = false
-            productions.forEach { (left, rightSymbols) ->
+            grammar.forEach { (left, rightSymbols) ->
                 // 倒序遍历产生式的右部
                 for (last in rightSymbols.reversed()) {
                     when (last) {

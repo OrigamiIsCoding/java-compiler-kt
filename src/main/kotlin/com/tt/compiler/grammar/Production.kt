@@ -24,9 +24,7 @@ data class Production(
          */
         fun parse(line: String): List<Production> {
             val tokens = line.split(" ").filter(String::isNotBlank)
-            if (tokens.size < 3 && Separator != tokens[1]) {
-                throw IllegalGrammarSymbolException("产生式格式错误")
-            }
+            check(tokens.size >= 3 && Separator == tokens[1]) { "产生式格式错误" }
 
             // 获取产生式的左部
             val left = tokens.first()
@@ -54,5 +52,6 @@ data class Production(
     fun toExpression(): String {
         return "${left.value} $Separator ${right.map(Symbol::value).joinToString(" ")}"
     }
-
 }
+
+
