@@ -11,7 +11,6 @@ import java.util.*
  * @date 4/18/2023 7:56 PM
  */
 class GrammarAnalyzerLL1Impl : GrammarAnalyzer {
-    constructor(lines: List<String>) : super(lines)
     constructor(inputGrammar: String) : super(inputGrammar)
     constructor(grammar: Grammar) : super(grammar)
 

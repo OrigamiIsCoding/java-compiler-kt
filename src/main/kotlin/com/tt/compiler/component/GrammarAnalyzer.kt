@@ -13,8 +13,7 @@ abstract class GrammarAnalyzer {
         this.grammar = grammar
     }
 
-    constructor(inputGrammar: String) : this(inputGrammar.split("\n"))
-    constructor(lines: List<String>) : this(Grammar(lines.flatMap(Production::parse)))
+    constructor(inputGrammar: String) : this(Grammar.parse(inputGrammar))
 
     protected var grammar: Grammar
 

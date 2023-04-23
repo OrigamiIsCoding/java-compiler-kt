@@ -5,7 +5,6 @@ import com.tt.compiler.grammar.Grammar
 import com.tt.compiler.grammar.Production
 
 class GrammarAnalyzerSLRImpl : GrammarAnalyzer {
-    constructor(lines: List<String>) : super(lines)
     constructor(inputGrammar: String) : super(inputGrammar)
 
     // 转换为拓广文法

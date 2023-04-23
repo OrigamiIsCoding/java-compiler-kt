@@ -45,6 +45,10 @@ sealed class Symbol(
          */
         val ExtendedStart = NonTerminal("S'")
 
+        /**
+         * LR(0) 项目中的点
+         */
+        val Dot = Terminal("·")
         fun from(value: String): Symbol {
             return value.trim().ifBlank {
                 throw IllegalGrammarSymbolException("终结符和非终结符不能为空")

@@ -23,4 +23,15 @@ sealed class Node<T, Accept>(
         value: T,
         next: MutableMap<Accept, Node<T, Accept>> = mutableMapOf()
     ) : Node<T, Accept>(value, next)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Node<*, *>) return false
+
+        return value == other.value
+    }
+
+    override fun hashCode(): Int {
+        return value?.hashCode() ?: 0
+    }
 }

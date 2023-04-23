@@ -7,14 +7,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-val TestGrammar1 = """
-    S  -> T S'
-    S' -> + T S' | ε
-    T  -> F T'
-    T' -> * F T' | ε
-    F  -> ( S ) | id
-""".trimIndent().parse()
-
 /**
  * @author Origami
  * @date 4/19/2023 5:19 PM
@@ -148,9 +140,3 @@ class GrammarAnalyzerLL1ImplTest {
         )
     }
 }
-
-fun s(value: String) = Symbol.from(value)
-fun t(value: String) = Symbol.terminal(value)
-fun nt(value: String) = Symbol.nonTerminal(value)
-fun p(value: String) = Production.parse(value).first()
-fun String.parse() = Grammar.parse(this)
