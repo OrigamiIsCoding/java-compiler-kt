@@ -28,5 +28,6 @@ fun t(value: String) = Symbol.terminal(value)
 fun nt(value: String) = Symbol.nonTerminal(value)
 fun p(value: String) = Production.parse(value).first()
 fun lr0(value: String): LR0Item = LR0Item.parse(value)
+fun lr0s(vararg values: String) = values.map { lr0(it) }.toSet()
 
 fun String.parse() = Grammar.parse(this)

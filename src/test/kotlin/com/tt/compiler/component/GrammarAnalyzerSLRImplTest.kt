@@ -26,53 +26,65 @@ class GrammarAnalyzerSLRImplTest {
 
     @Test
     fun testLR0Automata() {
-        val automata = LR0Automaton(TestGrammar2)
-        val state0 = automata[listOf(
-            "S' -> · S",
-            "S -> · B B",
-            "B -> · a B",
-            "B -> · b"
-        ).map(::lr0).toSet()]!!
-        val state1 = automata[setOf(
-            lr0("S' -> S ·")
-        )]!!
-        val state2 = automata[listOf(
-            "S -> B · B",
-            "B -> · a B",
-            "B -> · b"
-        ).map(::lr0).toSet()]!!
-        val state3 = automata[listOf(
-            "B -> a · B",
-            "B -> · a B",
-            "B -> · b"
-        ).map(::lr0).toSet()]!!
-        val state4 = automata[setOf(
-            lr0("B -> b ·")
-        )]!!
-        val state5 = automata[setOf(
-            lr0("S -> B B ·")
-        )]!!
-        val state6 = automata[setOf(
-            lr0("B -> a B ·")
-        )]!!
+        LR0Automaton(TestGrammar2).apply {
+            val state0 = get(
+                lr0s(
+                    "S' -> · S",
+                    "S -> · B B",
+                    "B -> · a B",
+                    "B -> · b"
+                )
+            )!!
+            val state1 = get(
+                lr0s("S' -> S ·")
+            )!!
+            val state2 = get(
+                lr0s(
+                    "S -> B · B",
+                    "B -> · a B",
+                    "B -> · b"
+                )
+            )!!
+            val state3 = get(
+                lr0s(
+                    "B -> a · B",
+                    "B -> · a B",
+                    "B -> · b"
+                )
+            )!!
+            val state4 = get(
+                lr0s("B -> b ·")
+            )!!
+            val state5 = get(
+                lr0s("S -> B B ·")
+            )!!
+            val state6 = get(
+                lr0s("B -> a B ·")
+            )!!
 
-        assertEquals(state0[nt("S")]!!, state1)
-        assertEquals(state0[nt("B")]!!, state2)
-        assertEquals(state0[t("b")]!!, state4)
-        assertEquals(state0[t("a")]!!, state3)
+            state0.apply {
+                assertEquals(get(nt("S"))!!, state1)
+                assertEquals(get(nt("B"))!!, state2)
+                assertEquals(get(t("b"))!!, state4)
+                assertEquals(get(t("a"))!!, state3)
+            }
 
-        assertEquals(state2[nt("B")]!!, state5)
-        assertEquals(state2[t("b")]!!, state4)
-        assertEquals(state2[t("a")]!!, state3)
+            state2.apply {
+                assertEquals(get(nt("B"))!!, state5)
+                assertEquals(get(t("b"))!!, state4)
+                assertEquals(get(t("a"))!!, state3)
+            }
 
+            state3.apply {
+                assertEquals(get(nt("B"))!!, state6)
+                assertEquals(get(t("b"))!!, state4)
+                assertEquals(get(t("a"))!!, state3)
+            }
 
-        assertEquals(state3[nt("B")]!!, state6)
-        assertEquals(state3[t("b")]!!, state4)
-        assertEquals(state3[t("a")]!!, state3)
-
-        assert(!state1.hasOut())
-        assert(!state4.hasOut())
-        assert(!state5.hasOut())
-        assert(!state6.hasOut())
+            assert(!state1.hasOut())
+            assert(!state4.hasOut())
+            assert(!state5.hasOut())
+            assert(!state6.hasOut())
+        }
     }
 }
