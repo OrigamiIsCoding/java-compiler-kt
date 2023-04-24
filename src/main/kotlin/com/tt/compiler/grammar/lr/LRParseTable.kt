@@ -10,4 +10,5 @@ import com.tt.compiler.grammar.Terminal
 interface LRParseTable {
     val action: Map<Int, Map<Terminal, Action>>
     val goto: Map<Int, Map<NonTerminal, Int>>
+    val startState: Int
 }

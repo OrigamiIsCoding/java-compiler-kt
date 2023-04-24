@@ -12,6 +12,10 @@ class FollowSet private constructor(firstSet: FirstSet, grammar: Grammar) :
     companion object {
         val Empty = FollowSet(FirstSet.Empty, Grammar.Empty)
 
+        fun from(grammar: Grammar): FollowSet {
+            return from(FirstSet.from(grammar), grammar)
+        }
+
         fun from(firstSet: FirstSet, grammar: Grammar): FollowSet {
             return FollowSet(firstSet, grammar)
         }

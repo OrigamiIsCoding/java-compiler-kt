@@ -10,9 +10,9 @@ import java.util.*
  * @author Origami
  * @date 4/18/2023 7:56 PM
  */
-class GrammarAnalyzerLL1Impl : GrammarAnalyzer {
-    constructor(inputGrammar: String) : super(inputGrammar)
-    constructor(grammar: Grammar) : super(grammar)
+class GrammarAnalyzerLL1Impl(override val grammar: Grammar) : GrammarAnalyzer {
+
+    private val parseTable: LL1ParseTable
 
     init {
         // 构建 FirstSet、FollowSet、LL(1) Table
@@ -26,40 +26,25 @@ class GrammarAnalyzerLL1Impl : GrammarAnalyzer {
         parseTable = LL1ParseTable(firstSet, followSet)
     }
 
-    private val parseTable: LL1ParseTable
-
     override fun analyze(sentence: String): List<Production> {
         // 输入的句子符号
-        val inputSymbols = sentence.split(" ")
-            .filter(String::isNotBlank)
-            .map(Symbol::from)
-            .toMutableList()
-
-        if (inputSymbols.isEmpty()) {
-            return emptyList()
-        } else if (inputSymbols.last() != Symbol.End) {
-            // 如果句子的最后一个符号不是结束符号，则添加结束符号
-            inputSymbols.add(Symbol.End)
-        }
-
+        val input = sentence.toInputSymbols()
         // 解析的产生式
         val parseProductions = mutableListOf<Production>()
-        // 输入符号指针
-        var inputIndex = 0
         // 分析栈，刚开始的时候压入 End 和 Start
         val stack = Stack<Symbol>().apply {
             push(Symbol.End)
             push(Symbol.Start)
         }
 
-        while (stack.isNotEmpty() && inputIndex < inputSymbols.size) stack.apply {
+        while (stack.isNotEmpty() && input.notOver) stack.apply {
             // 当前输入符号
-            val current = inputSymbols[inputIndex]
+            val current = input.current
             // 获取当前栈顶符号
             val top = pop()
 
             if (top == current) {
-                inputIndex++
+                input.next()
             } else {
                 parseTable[top]?.get(current)?.let {
                     parseProductions.add(it)
@@ -71,7 +56,7 @@ class GrammarAnalyzerLL1Impl : GrammarAnalyzer {
             }
         }
 
-        if (stack.isNotEmpty() || inputIndex < inputSymbols.size) {
+        if (stack.isNotEmpty() || input.notOver) {
             throw IllegalGrammarSymbolException("输入的句子 $sentence 不符合该文法")
         }
 

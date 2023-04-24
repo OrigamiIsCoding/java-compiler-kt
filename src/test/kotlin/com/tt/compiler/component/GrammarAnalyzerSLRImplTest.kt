@@ -1,5 +1,6 @@
 package com.tt.compiler.component
 
+import com.tt.compiler.component.impl.GrammarAnalyzerSLRImpl
 import com.tt.compiler.grammar.FirstSet
 import com.tt.compiler.grammar.FollowSet
 import com.tt.compiler.grammar.Production
@@ -175,5 +176,27 @@ class GrammarAnalyzerSLRImplTest {
         }
 
         println(parseTable)
+    }
+
+    @Test
+    fun testSLRPArse1() {
+        val grammarAnalyzerLL1Impl = GrammarAnalyzerSLRImpl(TestGrammar3)
+        val productions = grammarAnalyzerLL1Impl.analyze("id + id * id")
+        productions.forEach { println(it) }
+    }
+
+    @Test
+    fun testSLRParse2() {
+        val parser = GrammarAnalyzerSLRImpl(TestGrammar2)
+
+        assertEquals(
+            listOf(
+                "B -> b",
+                "B -> b",
+                "B -> a B",
+                "S -> B B"
+            ).map { p(it) },
+            parser.analyze("b a b")
+        )
     }
 }
