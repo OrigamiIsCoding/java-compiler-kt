@@ -11,9 +11,9 @@ import com.tt.compiler.grammar.Terminal
  */
 
 
-class SLRParseTable(automaton: LR0Automaton, followSet: FollowSet) {
-    val action: Map<Int, Map<Terminal, Action>>
-    val goto: Map<Int, Map<NonTerminal, Int>>
+class SLRParseTable(automaton: LR0Automaton, followSet: FollowSet) : LRParseTable {
+    override val action: Map<Int, Map<Terminal, Action>>
+    override val goto: Map<Int, Map<NonTerminal, Int>>
     private val states = automaton.states.map { it.value }
 
     init {
