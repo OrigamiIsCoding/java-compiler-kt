@@ -19,10 +19,16 @@ data class LR0Item(
     val dot: Int = 0
 ) : Iterator<LR0Item> {
 
+    /**
+     * 小圆点是否可以往下移动
+     */
     override fun hasNext(): Boolean {
         return dot < production.right.size
     }
 
+    /**
+     * 移动到下一个位置，并返回
+     */
     override fun next(): LR0Item {
         if (!hasNext()) {
             throw NoSuchElementException()
@@ -42,7 +48,14 @@ data class LR0Item(
         }
 
     companion object {
+        /**
+         * 开始的项目就是扩展文法加入的产生式
+         */
         val Start = LR0Item(Production.ExtendedProduction)
+
+        /**
+         * 接受的项目就是扩展文法往下移动一次
+         */
         val Accept = Start.next()
 
         fun parse(line: String): LR0Item {

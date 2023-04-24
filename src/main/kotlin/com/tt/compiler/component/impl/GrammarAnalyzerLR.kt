@@ -8,10 +8,15 @@ import com.tt.compiler.grammar.lr.LRParseTable
 import java.util.*
 
 /**
+ * LR 分析器，对于 LR 分析表的结构和含义都是一样的，所以可以抽象一层
+ * 而具体构建的过程 LR(0), SLR 和 LALR 是不一样的，所以交由子类实现构建表
  * @author Origami
  * @date 4/24/2023 10:24 AM
  */
 interface GrammarAnalyzerLR : GrammarAnalyzer {
+    /**
+     * LR 分析表
+     */
     val parseTable: LRParseTable
     override fun analyze(sentence: String): List<Production> {
         val input = sentence.toInputSymbols()
@@ -27,17 +32,23 @@ interface GrammarAnalyzerLR : GrammarAnalyzer {
             push(Symbol.End)
         }
         while (true) {
+            // 合法性校验
             check(input.notOver && stateStack.isNotEmpty()) { "语法分析失败，该句子不属于该文法" }
+
+            // 当前输入符号
             val current = input.current
-            val topState = stateStack.peek()
-            parseTable.action[topState]!![current]?.also { action ->
+
+            // 查询当前栈顶状态的 action 表
+            parseTable.action[stateStack.peek()]!![current]?.also { action ->
                 when (action) {
+                    // 接受状态，返回解析的产生式
                     Action.Accept -> return parseProductions
-                    // 当前是规约状态，则将产生式的右部弹出符号栈，将产生式的左部压入符号栈
+                    // 规约状态
                     is Action.Reduce -> {
                         val production = action.production
                         parseProductions.add(production)
 
+                        // 将栈弹出产生式右部符号个数
                         for (i in 0 until production.right.size) {
                             symbolStack.pop()
                             stateStack.pop()
@@ -45,16 +56,20 @@ interface GrammarAnalyzerLR : GrammarAnalyzer {
 
                         val left = production.left
 
+                        // 产生式的左部入栈
                         symbolStack.push(left)
-                        // 查询 goto 表，将 goto 表中的状态压入状态栈
-                        parseTable.goto[stateStack.peek()]!![left]?.let {
+
+                        // 查询 goto 表，将 goto[left] 表中的状态压入状态栈
+                        parseTable.goto[stateStack.peek()]!![left]?.also {
                             stateStack.push(it)
                         } ?: throw IllegalStateException("goto 表中没有找到状态，该句子不属于该文法")
                     }
-                    // 当前是移入状态，则将当前输入符号压入符号栈，将当前状态压入状态栈
+                    // 移入状态
                     is Action.Shift -> {
+                        // 将当前符号和状态入栈
                         symbolStack.push(current)
                         stateStack.push(action.state)
+                        // 输入指针右移
                         input.next()
                     }
                 }
