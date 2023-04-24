@@ -13,12 +13,7 @@ class FollowSet private constructor(firstSet: FirstSet, grammar: Grammar) :
         val Empty = FollowSet(FirstSet.Empty, Grammar.Empty)
 
         fun from(firstSet: FirstSet, grammar: Grammar): FollowSet {
-            // 只有当 FirstSet 中包括空串时，才需要构建 FollowSet
-            return if (firstSet.values.flatten().map { it.first }.contains(Symbol.Empty)) {
-                FollowSet(firstSet, grammar)
-            } else {
-                Empty
-            }
+            return FollowSet(firstSet, grammar)
         }
 
         /**

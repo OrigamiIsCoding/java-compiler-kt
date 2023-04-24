@@ -14,7 +14,7 @@ import com.tt.compiler.grammar.Terminal
 class SLRParseTable(automaton: LR0Automaton, followSet: FollowSet) {
     val action: Map<Int, Map<Terminal, Action>>
     val goto: Map<Int, Map<NonTerminal, Int>>
-    val states = automaton.states.map { it.value }
+    private val states = automaton.states.map { it.value }
 
     init {
         val actionTable = mutableMapOf<Int, MutableMap<Terminal, Action>>()
@@ -47,14 +47,31 @@ class SLRParseTable(automaton: LR0Automaton, followSet: FollowSet) {
     }
 
     override fun toString(): String {
-        return "SLRParseTable {" + this.states.map {
-            action[it]!!.map { (terminal, action) ->
-                "\taction[$it][$terminal] = $action"
-            } + goto[it]!!.map { (nonTerminal, state) ->
-                "\tgoto[$it][$nonTerminal] = $state"
-            }.joinToString("\n")
-        }.joinToString("\n") + "}"
+        return "SLRParseTable {\n${formatTable("ActionTable", action)},\n${formatTable("GotoTable", goto)}\n}"
     }
 
+    /**
+     * 格式化表格
+     * \tTable {
+     * \t\tState 0:
+     * \t\t\tTerminal -> Action
+     * \t}
+     * @param tableName 表格名
+     * @param table 表格
+     * @return 格式化后的表格
+     */
+    private fun formatTable(tableName: String, table: Map<Int, Map<*, *>>): String {
+        val indent = "\t".repeat(1)
+        val indent1 = "\t".repeat(2)
+        val indent2 = "\t".repeat(3)
+        return "$indent$tableName {\n" + this.states
+            .filterNot { table[it].isNullOrEmpty() }
+            .joinToString("\n") {
+                indent1 + "State $it:" + table[it]!!.map { (key, value) ->
+                    "$key -> $value"
+                }.joinToString("\n$indent2", prefix = "\n$indent2")
+            } + "\n$indent}"
+
+    }
 
 }

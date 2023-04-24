@@ -3,6 +3,7 @@ package com.tt.compiler.component
 import com.tt.compiler.grammar.FirstSet
 import com.tt.compiler.grammar.FollowSet
 import com.tt.compiler.grammar.Production
+import com.tt.compiler.grammar.lr.Action
 import com.tt.compiler.grammar.lr.LR0Automaton
 import com.tt.compiler.grammar.lr.LR0Item
 import com.tt.compiler.grammar.lr.SLRParseTable
@@ -118,6 +119,61 @@ class GrammarAnalyzerSLRImplTest {
         val followSet = FollowSet.from(firstSet, grammar)
         val automaton = LR0Automaton(grammar)
         val parseTable = SLRParseTable(automaton, followSet)
+
+        parseTable.goto.apply {
+            assertEquals(
+                mapOf(
+                    nt("S") to 1,
+                    nt("T") to 2,
+                    nt("F") to 3,
+                ), this[0]
+            )
+
+            assertEquals(
+                mapOf(
+                    nt("S") to 8,
+                    nt("T") to 2,
+                    nt("F") to 3,
+                ), this[4]
+            )
+
+            assertEquals(
+                mapOf(
+                    nt("T") to 9,
+                    nt("F") to 3,
+                ), this[6]
+            )
+
+            assertEquals(
+                mapOf(
+                    nt("F") to 10,
+                ), this[7]
+            )
+
+            sequenceOf(1, 2, 3, 5, 8, 9, 10, 11).forEach {
+                assertEquals(
+                    mapOf(),
+                    this[it]
+                )
+            }
+        }
+
+        parseTable.action.apply {
+            assertEquals(
+                mapOf(
+                    t("(") to Action.Shift(4),
+                    t("id") to Action.Shift(5),
+                ), this[0]
+            )
+
+            assertEquals(
+                mapOf(
+                    t("+") to Action.Shift(6),
+                    t("$") to Action.Accept,
+                ), this[1]
+            )
+        }
+
         println(parseTable)
     }
 }

@@ -17,7 +17,12 @@ class GrammarAnalyzerLL1Impl : GrammarAnalyzer {
     init {
         // 构建 FirstSet、FollowSet、LL(1) Table
         val firstSet = FirstSet.from(grammar)
-        val followSet = FollowSet.from(firstSet, grammar)
+        // 只有当 FirstSet 中包括空串时，才需要构建 FollowSet
+        val followSet = if (firstSet.values.flatten().map { it.first }.contains(Symbol.Empty)) {
+            FollowSet.from(firstSet, grammar)
+        } else {
+            FollowSet.Empty
+        }
         parseTable = LL1ParseTable(firstSet, followSet)
     }
 

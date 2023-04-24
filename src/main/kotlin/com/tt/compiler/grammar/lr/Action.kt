@@ -10,7 +10,7 @@ sealed class Action {
     /**
      * 移进
      */
-    class Shift(val state: Int) : Action() {
+    data class Shift(val state: Int) : Action() {
         override fun toString(): String {
             return "Shift { $state }"
         }
@@ -19,7 +19,7 @@ sealed class Action {
     /**
      * 规约
      */
-    class Reduce(val production: Production) : Action() {
+    data class Reduce(val production: Production) : Action() {
         override fun toString(): String {
             return "Reduce { $production }"
         }
