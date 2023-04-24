@@ -7,6 +7,30 @@ import com.tt.compiler.grammar.Production
  * @date 4/23/2023 11:16 PM
  */
 sealed class Action {
-    class Shift(val state: Int) : Action()
-    class Reduce(val production: Production) : Action()
+    /**
+     * 移进
+     */
+    class Shift(val state: Int) : Action() {
+        override fun toString(): String {
+            return "Shift { $state }"
+        }
+    }
+
+    /**
+     * 规约
+     */
+    class Reduce(val production: Production) : Action() {
+        override fun toString(): String {
+            return "Reduce { $production }"
+        }
+    }
+
+    /**
+     * 接受
+     */
+    object Accept : Action() {
+        override fun toString(): String {
+            return "Accept"
+        }
+    }
 }

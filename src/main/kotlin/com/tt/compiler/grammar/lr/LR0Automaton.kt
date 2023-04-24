@@ -1,7 +1,7 @@
 package com.tt.compiler.grammar.lr
 
-import com.tt.compiler.automata.SimpleAutomaton
-import com.tt.compiler.automata.SimpleNode
+import com.tt.compiler.automata.Automaton
+import com.tt.compiler.automata.Node
 import com.tt.compiler.grammar.*
 
 /**
@@ -10,15 +10,14 @@ import com.tt.compiler.grammar.*
  * @date 4/23/2023 1:01 PM
  */
 private typealias ClosureOfItemSets = Set<LR0Item>
-private typealias Node = SimpleNode<Int, Symbol>
 
 class LR0Automaton(
     grammar: Grammar,
-) : SimpleAutomaton<Int, Symbol> {
+) : Automaton<Int, Symbol> {
 
-    override val start: Node
-    override val states: List<Node>
-    private val closures: List<ClosureOfItemSets>
+    override val start: Node<Int, Symbol>
+    override val states: List<Node<Int, Symbol>>
+    val closures: List<ClosureOfItemSets>
 
     init {
         // 先将文法转换为扩展文法
@@ -30,9 +29,9 @@ class LR0Automaton(
         val startClosure = productionMap.closure(LR0Item.Start)
 
         // 开始状态
-        start = Node(0)
+        start = Node.Reject(0)
         // 记录所有的状态，防止重复出现
-        val allStates = mutableMapOf(
+        val allStates: MutableMap<ClosureOfItemSets, Node<Int, Symbol>> = mutableMapOf(
             startClosure to start
         )
 
@@ -46,17 +45,17 @@ class LR0Automaton(
             // 遍历这个状态，需要可以移动的项目
             state.filter { it.hasNext() }
                 .groupBy { it.wait } // 根据当前等待的符号进行分组
-                .forEach { (accept, nextItem) ->
-                    val nextState = nextItem
-                        .map { it.next() } // 进行移动
-                        .flatMap { productionMap.closure(it) } // 求可以移动的项目集构成的项目集闭包
-                        .toSet()
+                .forEach { (accept, nextItems) ->
+                    val nextState = productionMap.goto(nextItems)
 
                     // 判断是否出现在之前状态中，没有就加入
                     if (nextState !in allStates) {
+                        allStates[nextState] = if (nextState.contains(LR0Item.Accept)) {
+                            Node.Accept(processQueue.size)
+                        } else {
+                            Node.Reject(processQueue.size)
+                        }
                         processQueue.add(nextState)
-                        // 给状态编号
-                        allStates[nextState] = Node(processQueue.size)
                     }
                     // 加入到表中
                     allStates[state]!![accept!!] = allStates[nextState]!!
@@ -64,10 +63,6 @@ class LR0Automaton(
         }
         states = allStates.values.sortedBy { it.value }
         closures = processQueue
-    }
-
-    fun getClosure(state: Int): ClosureOfItemSets? {
-        return closures.getOrNull(state)
     }
 
     /**
@@ -106,6 +101,19 @@ class LR0Automaton(
             }
         }
         return itemSets
+    }
+
+    /**
+     * 返回 goto(I, X) 的项目集闭包
+     *
+     * @see LR0Item 这里的文法符号 X 隐藏在了 LR0Item 中
+     * @param items 项目集
+     * @return goto(I, X) 的项目集闭包
+     */
+    private fun Map<NonTerminal, List<Production>>.goto(items: List<LR0Item>): ClosureOfItemSets {
+        return items.map { it.next() }
+            .flatMap { closure(it) }
+            .toSet()
     }
 
     override fun toString(): String {

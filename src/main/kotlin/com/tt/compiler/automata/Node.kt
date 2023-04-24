@@ -13,16 +13,24 @@ sealed class Node<T, Accept>(
      * 节点的子节点
      */
     private val next: MutableMap<Accept, Node<T, Accept>>
-) {
+) : MutableMap<Accept, Node<T, Accept>> by next {
     class Accept<T, Accept>(
         value: T,
         next: MutableMap<Accept, Node<T, Accept>> = mutableMapOf()
-    ) : Node<T, Accept>(value, next)
+    ) : Node<T, Accept>(value, next) {
+        override fun toString(): String {
+            return "Accept { $value }"
+        }
+    }
 
     class Reject<T, Accept>(
         value: T,
         next: MutableMap<Accept, Node<T, Accept>> = mutableMapOf()
-    ) : Node<T, Accept>(value, next)
+    ) : Node<T, Accept>(value, next) {
+        override fun toString(): String {
+            return "Reject { $value }"
+        }
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -33,5 +41,9 @@ sealed class Node<T, Accept>(
 
     override fun hashCode(): Int {
         return value?.hashCode() ?: 0
+    }
+
+    fun hasOut(): Boolean {
+        return next.isNotEmpty()
     }
 }

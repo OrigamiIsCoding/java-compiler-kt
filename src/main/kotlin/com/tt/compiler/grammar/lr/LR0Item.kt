@@ -43,6 +43,7 @@ data class LR0Item(
 
     companion object {
         val Start = LR0Item(Production.ExtendedProduction)
+        val Accept = Start.next()
 
         fun parse(line: String): LR0Item {
             val (left, right) = Production.parse(line).first()

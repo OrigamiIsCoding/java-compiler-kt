@@ -1,8 +1,11 @@
 package com.tt.compiler.component
 
+import com.tt.compiler.grammar.FirstSet
+import com.tt.compiler.grammar.FollowSet
 import com.tt.compiler.grammar.Production
 import com.tt.compiler.grammar.lr.LR0Automaton
 import com.tt.compiler.grammar.lr.LR0Item
+import com.tt.compiler.grammar.lr.SLRParseTable
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -106,5 +109,15 @@ class GrammarAnalyzerSLRImplTest {
 
             assert(sequenceOf(3, 5, 10, 11).all { !states[it].hasOut() })
         }
+    }
+
+    @Test
+    fun testSLRParseTable() {
+        val grammar = TestGrammar3
+        val firstSet = FirstSet.from(grammar)
+        val followSet = FollowSet.from(firstSet, grammar)
+        val automaton = LR0Automaton(grammar)
+        val parseTable = SLRParseTable(automaton, followSet)
+        println(parseTable)
     }
 }
