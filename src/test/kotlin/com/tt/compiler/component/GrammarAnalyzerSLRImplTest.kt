@@ -179,9 +179,9 @@ class GrammarAnalyzerSLRImplTest {
     }
 
     @Test
-    fun testSLRPArse1() {
-        val grammarAnalyzerLL1Impl = GrammarAnalyzerSLRImpl(TestGrammar3)
-        val productions = grammarAnalyzerLL1Impl.analyze("id + id * id")
+    fun testSLRParse1() {
+        val analyzer = GrammarAnalyzerSLRImpl(TestGrammar3)
+        val productions = analyzer.analyze("id + id * id")
         productions.forEach { println(it) }
     }
 
