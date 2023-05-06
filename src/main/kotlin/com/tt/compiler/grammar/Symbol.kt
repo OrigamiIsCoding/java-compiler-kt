@@ -49,6 +49,11 @@ sealed class Symbol(
          * LR(0) 项目中的点
          */
         val Dot = Terminal("·")
+
+        /**
+         * LR(1) 项目中用于分隔产生式和搜索符
+         */
+        val Comma = Terminal(",")
         fun from(value: String): Symbol {
             return value.trim().ifBlank {
                 throw IllegalGrammarSymbolException("终结符和非终结符不能为空")
