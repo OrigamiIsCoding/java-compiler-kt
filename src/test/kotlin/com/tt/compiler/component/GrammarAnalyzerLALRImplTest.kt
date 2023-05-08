@@ -1,6 +1,7 @@
 package com.tt.compiler.component
 
 import com.tt.compiler.grammar.FirstSet
+import com.tt.compiler.grammar.lr.LR1Automaton
 import com.tt.compiler.grammar.lr.LR1Item
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -12,14 +13,20 @@ import kotlin.test.assertEquals
 class GrammarAnalyzerLALRImplTest {
     @Test
     fun testParseLR1Item() {
-        val item = LR1Item.parse("S -> · T E , { $,a,b }")
-        val item2 = LR1Item.parse("S -> · T E , { }")
-        assertEquals("S -> · T E , { \$, a, b }", item.toExpression())
-        assertEquals("S -> · T E , {  }", item2.toExpression())
+        val item = LR1Item.parse("S -> · T E LookAhead { $,a,b }")
+        val item2 = LR1Item.parse("S -> · T E  LookAhead{ }")
+        assertEquals("S -> · T E LookAhead { \$, a, b }", item.toExpression())
+        assertEquals("S -> · T E LookAhead {  }", item2.toExpression())
     }
 
     @Test
     fun testBuildLR1Item() {
-        println(FirstSet.from(TestGrammar4))
+        val extendedGrammar = TestGrammar5.toExtended()
+        val firstSet = FirstSet.from(extendedGrammar)
+        val automaton = LR1Automaton(extendedGrammar, firstSet)
+        automaton.closures.forEachIndexed { index, closure ->
+            println("I$index:")
+            closure.forEach { println(it) }
+        }
     }
 }

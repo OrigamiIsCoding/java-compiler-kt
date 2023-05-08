@@ -7,7 +7,7 @@ import com.tt.compiler.grammar.Symbol
  * @author Origami
  * @date 5/6/2023 8:38 AM
  */
-interface LRItem : Iterator<LR0Item> {
+interface LRItem : Iterator<LRItem> {
     /**
      * 产生式
      */
@@ -26,15 +26,22 @@ interface LRItem : Iterator<LR0Item> {
     }
 
     /**
+     * 获取接下来等待的符号
+     * @param k 等待的符号的位置(0:等待的下一个符号,1:等待的下下个符号,以此类推)
+     * @return 等待的符号, 如果不存在则返回 null
+     */
+    fun waitK(k: Int): Symbol? {
+        if (dot + k >= production.right.size) {
+            return null
+        }
+        return production.right[dot + k]
+    }
+
+    /**
      * 当前项目在等待的符号
      */
     val wait: Symbol?
-        get() {
-            if (!hasNext()) {
-                return null
-            }
-            return production.right[dot]
-        }
+        get() = waitK(0)
 
     fun toExpression(): String {
         val rightProductions = production.right.mapIndexed { index, symbol ->

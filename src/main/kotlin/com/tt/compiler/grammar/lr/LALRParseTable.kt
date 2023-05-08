@@ -1,6 +1,5 @@
 package com.tt.compiler.grammar.lr
 
-import com.tt.compiler.grammar.FollowSet
 import com.tt.compiler.grammar.NonTerminal
 import com.tt.compiler.grammar.Symbol
 import com.tt.compiler.grammar.Terminal
@@ -10,7 +9,7 @@ import com.tt.compiler.grammar.Terminal
  * @author Origami
  * @date 4/23/2023 12:51 PM
  */
-class SLRParseTable(automaton: LR0Automaton, followSet: FollowSet) : LRParseTable {
+class LALRParseTable(automaton: LR1Automaton) : LRParseTable {
     override val action: Map<Int, Map<Terminal, Action>>
     override val goto: Map<Int, Map<NonTerminal, Int>>
     override val startState: Int = automaton.start.value
@@ -38,10 +37,9 @@ class SLRParseTable(automaton: LR0Automaton, followSet: FollowSet) : LRParseTabl
             automaton.closures[state.value].filter { !it.hasNext() }.forEach {
                 when (it) {
                     // 如果产生式是 [S' -> S ·] 也就是接受状态，则加入 $ 的状态为接受
-                    LR0Item.Accept -> action[Symbol.End] = Action.Accept
-                    // 否则是其他产生式，那么当前是规约状态
-                    // 将当前产生式加入产生式左部的 FollowSet 中的终结符的位置上
-                    else -> followSet[it.production.left]?.forEach { terminal ->
+                    LR1Item.Accept -> action[Symbol.End] = Action.Accept
+                    // 否则是其他产生式，那么当前是规约状态，将当前的 lookAhead 加入到 action 表中
+                    else -> it.lookAhead.forEach { terminal ->
                         action[terminal] = Action.Reduce(it.production)
                     }
                 }

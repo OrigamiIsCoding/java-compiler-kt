@@ -13,10 +13,10 @@ class FollowSet private constructor(firstSet: FirstSet, grammar: Grammar) :
         val Empty = FollowSet(FirstSet.Empty, Grammar.Empty)
 
         fun from(grammar: Grammar): FollowSet {
-            return from(FirstSet.from(grammar), grammar)
+            return from(grammar, FirstSet.from(grammar))
         }
 
-        fun from(firstSet: FirstSet, grammar: Grammar): FollowSet {
+        fun from(grammar: Grammar, firstSet: FirstSet): FollowSet {
             return FollowSet(firstSet, grammar)
         }
 
@@ -31,7 +31,7 @@ class FollowSet private constructor(firstSet: FirstSet, grammar: Grammar) :
                 return emptyMap()
             }
             val map = mutableMapOf<NonTerminal, MutableSet<Terminal>>()
-            map[Symbol.Start] = mutableSetOf(Symbol.End)
+            map[if (grammar.isExtended) Symbol.ExtendedStart else Symbol.Start] = mutableSetOf(Symbol.End)
             while (true) {
                 if (!map.update(firstSet, grammar)) {
                     break

@@ -19,7 +19,7 @@ class GrammarAnalyzerLL1Impl(override val grammar: Grammar) : GrammarAnalyzer {
         val firstSet = FirstSet.from(grammar)
         // 只有当 FirstSet 中包括空串时，才需要构建 FollowSet
         val followSet = if (firstSet.values.flatten().map { it.first }.contains(Symbol.Empty)) {
-            FollowSet.from(firstSet, grammar)
+            FollowSet.from(grammar, firstSet)
         } else {
             FollowSet.Empty
         }

@@ -15,9 +15,9 @@ class GrammarAnalyzerSLRImpl(grammar: Grammar) : GrammarAnalyzerLR {
         // 转换为拓广文法
         this.grammar = grammar.toExtended()
         // 求 Follow 集合
-        val followSet = FollowSet.from(grammar)
+        val followSet = FollowSet.from(this.grammar)
         // 构建活前缀 DFA
-        val automaton = LR0Automaton(grammar)
+        val automaton = LR0Automaton(this.grammar)
         // 构建 SLR 分析表
         this.parseTable = SLRParseTable(automaton, followSet)
     }

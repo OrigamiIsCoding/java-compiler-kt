@@ -12,7 +12,7 @@ import com.tt.compiler.grammar.*
 private typealias ClosureOfItem0Sets = Set<LR0Item>
 
 class LR0Automaton(
-    grammar: Grammar,
+    extendedGrammar: Grammar,
 ) : Automaton<Int, Symbol> {
 
     override val start: Node<Int, Symbol>
@@ -20,8 +20,6 @@ class LR0Automaton(
     val closures: List<ClosureOfItem0Sets>
 
     init {
-        // 先将文法转换为扩展文法
-        val extendedGrammar = grammar.toExtended()
         // 用于求等价项目的 Map
         val productionMap = extendedGrammar.groupBy { it.left }
 

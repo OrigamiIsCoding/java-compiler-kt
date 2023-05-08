@@ -117,7 +117,7 @@ class GrammarAnalyzerSLRImplTest {
     fun testSLRParseTable() {
         val grammar = TestGrammar3
         val firstSet = FirstSet.from(grammar)
-        val followSet = FollowSet.from(firstSet, grammar)
+        val followSet = FollowSet.from(grammar, firstSet)
         val automaton = LR0Automaton(grammar)
         val parseTable = SLRParseTable(automaton, followSet)
 
