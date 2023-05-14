@@ -34,7 +34,7 @@ class LALRParseTable(automaton: LR1Automaton) : LRParseTable {
             }
 
             // 遍历当前状态的项目集闭包，过滤掉小圆点不在最后的项目
-            automaton.closures[state.value].filter { !it.hasNext() }.forEach {
+            automaton.itemSets[state.value].filter { !it.hasNext() }.forEach {
                 when (it) {
                     // 如果产生式是 [S' -> S ·] 也就是接受状态，则加入 $ 的状态为接受
                     LR1Item.Accept -> action[Symbol.End] = Action.Accept

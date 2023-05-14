@@ -24,7 +24,13 @@ class GrammarAnalyzerLALRImplTest {
         val extendedGrammar = TestGrammar5.toExtended()
         val firstSet = FirstSet.from(extendedGrammar)
         val automaton = LR1Automaton(extendedGrammar, firstSet)
-        automaton.closures.forEachIndexed { index, closure ->
+        automaton.itemSets.forEachIndexed { index, closure ->
+            println("I$index:")
+            closure.forEach { println(it) }
+        }
+
+        println("==========")
+        automaton.mergeIdenticalKernelItemSets().itemSets.forEachIndexed { index, closure ->
             println("I$index:")
             closure.forEach { println(it) }
         }
