@@ -32,11 +32,10 @@ class FirstSet private constructor(grammar: Grammar) :
             val map = mutableMapOf<NonTerminal, MutableSet<Pair<Terminal, Production>>>()
             // 第一次先将 right 的第一个为终结符的加入到 First(left) 中
             grammar.forEach { production ->
-                production.right.take(1)
-                    .firstOrNull { it is Terminal }?.let {
-                        map.getOrPut(production.left) { mutableSetOf() }
-                            .add(it as Terminal to production)
-                    }
+                production.right.filterIsInstance(Terminal::class.java).firstOrNull()?.let {
+                    map.getOrPut(production.left) { mutableSetOf() }
+                        .add(it to production)
+                }
             }
 
             while (true) {
@@ -45,7 +44,7 @@ class FirstSet private constructor(grammar: Grammar) :
                     break
                 }
             }
-            return map.mapValues { it.value.toSet() }
+            return map
         }
 
         /**
@@ -56,23 +55,25 @@ class FirstSet private constructor(grammar: Grammar) :
         private fun MutableFirstSetMap.update(grammar: Grammar): Boolean {
             var updated = false
             grammar.forEach { production ->
-                // 遍历产生式右边的所有非终结符
-                for (rightSymbol in production.right.takeWhile { it is Symbol.NonTerminal }) {
-                    val containEmpty = this[rightSymbol]?.let {
+                this.getOrPut(production.left) { mutableSetOf() }.let { firstOfLeft ->
+                    // 遍历产生式右边的所有非终结符
+                    production.right.takeWhile { it is Symbol.NonTerminal }.all { rightSymbol ->
+                        this[rightSymbol]?.let { firstOfRight ->
 
-                        // 将 First(rightSymbol) 加入到 First(left)
-                        updated =
-                            updated || this.getOrPut(production.left) { mutableSetOf() }.addAll(it.map { (left, _) ->
-                                left to production
-                            })
+                            // 将 {First(rightSymbol) - 空串} 加入到 First(left)
+                            updated = updated || firstOfLeft.addAll(
+                                firstOfRight.map { it.first }
+                                    .minus(Symbol.Empty)
+                                    .map { it to production }
+                            )
 
-                        // 判断当前的 First 集合是否包括空串
-                        it.any { (symbol, _) -> symbol.isEmpty() }
-                    } ?: false
-
-                    // 如果不包含空串，则退出
-                    if (!containEmpty) {
-                        break
+                            // 判断当前的 First 集合是否包括空串
+                            firstOfRight.any { it.first.isEmpty() }
+                        } ?: false
+                    }.let {
+                        if (it) {
+                            updated = updated || firstOfLeft.add(Symbol.Empty to production)
+                        }
                     }
                 }
             }

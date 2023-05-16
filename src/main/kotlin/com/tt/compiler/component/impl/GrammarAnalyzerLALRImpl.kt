@@ -20,7 +20,16 @@ class GrammarAnalyzerLALRImpl(
         this.grammar = grammar.toExtended()
         // 构建 FirstSet、LR(1) Table
         val firstSet = FirstSet.from(this.grammar)
+        println(firstSet)
+        firstSet.forEach { key, value ->
+            println("key: $key")
+            value.forEach {
+                println(it)
+            }
+        }
+        // 构造 LR(1) 自动机并合并同心集
         val automaton = LR1Automaton(this.grammar, firstSet)
+            .mergeIdenticalKernelItemSets()
         this.parseTable = LALRParseTable(automaton)
     }
 }

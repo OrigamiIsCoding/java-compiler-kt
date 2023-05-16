@@ -78,58 +78,59 @@ class LR1Automaton : Automaton<Int, Symbol> {
         val newStateMap = mutableMapOf<Node<Int, Symbol>, Node<Int, Symbol>>()
         // 新的 LR(1) 项目集的 lookAhead
         val newLookAheadMap =
-            mutableMapOf<Set<Production>, MutableMap<Production, MutableSet<Terminal>>>()
-        val productionsToState = mutableMapOf<Set<Production>, Node<Int, Symbol>>()
-        val newClosure = mutableListOf<Set<Production>>()
+            mutableMapOf<Set<LR0Item>, MutableMap<LR0Item, MutableSet<Terminal>>>()
+        val lr0ItemsToNewState = mutableMapOf<Set<LR0Item>, Node<Int, Symbol>>()
+        val newClosure = mutableListOf<Set<LR0Item>>()
 
         // 遍历所有的状态
         states.forEach { node ->
             // 当前状态的项目集合
             val itemSet = itemSets[node.value]
             // 当前状态的所有产生式
-            val productions = itemSet.map { it.production }.toSet()
+            val lr0Items = itemSet.map { it.toLR0Item() }.toSet()
 
             // 如果当前产生式集合没有出现过，则新建一个状态
-            productionsToState.getOrPut(productions) {
-                newClosure.add(productions)
+            lr0ItemsToNewState.getOrPut(lr0Items) {
+                newClosure.add(lr0Items)
                 if (node is Node.Accept) {
-                    Node.Accept(newStateMap.size)
+                    Node.Accept(lr0ItemsToNewState.size)
                 } else {
-                    Node.Reject(newStateMap.size)
+                    Node.Reject(lr0ItemsToNewState.size)
                 }
             }
 
-            newLookAheadMap.getOrPut(productions) {
+            newLookAheadMap.getOrPut(lr0Items) {
                 // 初始化新状态的 lookAheadMap
-                productions.associateWithTo(mutableMapOf()) {
+                lr0Items.associateWithTo(mutableMapOf()) {
                     mutableSetOf()
                 }
             }.let {
                 // 将当前状态的 lookAheadMap 合并到新状态的 lookAheadMap 中
-                itemSet.forEach { (production, lookAhead) ->
-                    it[production]!!.addAll(lookAhead)
+                itemSet.forEach { lr1Item ->
+                    it[lr1Item.toLR0Item()]!!.addAll(lr1Item.lookAhead)
                 }
             }
 
             // 设置 原始状态->新状态 的映射
             // 如果产生式集合出现过，则直接使用之前的状态
-            newStateMap[node] = productionsToState[productions]!!
+            newStateMap[node] = lr0ItemsToNewState[lr0Items]!!
         }
 
         // 重新遍历一遍所有的状态，将状态转换的映射也进行替换
-        states.forEach { node ->
-            val newNode = newStateMap[node]!!
-            node.forEach { symbol, nextNode ->
-                newNode[symbol] = newStateMap[nextNode]!!
+        states.forEach { oldNode ->
+            newStateMap[oldNode]!!.let {
+                oldNode.forEach { symbol, oldNextNode ->
+                    it[symbol] = newStateMap[oldNextNode]!!
+                }
             }
         }
 
         return LR1Automaton(
             start = newStateMap[this.start]!!,
-            states = productionsToState.values.toList(),
+            states = lr0ItemsToNewState.values.toList(),
             itemSets = newClosure.map { closure ->
                 closure.map {
-                    LR1Item(it, newLookAheadMap[closure]!![it]!!)
+                    it.toLR1Item(newLookAheadMap[closure]!![it]!!)
                 }.toSet()
             }
         )
@@ -142,41 +143,39 @@ class LR1Automaton : Automaton<Int, Symbol> {
         }
 
         // 项目集
-        val itemSets = mutableSetOf(lr1Item)
-        val processQueue = ArrayDeque<Pair<LR1Item, Set<Terminal>>>().apply {
-            addLast(
-                Pair(
-                    lr1Item,
-                    lr1Item.waitK(1).let { wait ->
-                        when (wait) {
-                            is Symbol.NonTerminal -> firstSet[wait]!!.map { it.first }.toSet()
-                            else -> lr1Item.lookAhead
-                        }
-                    }
-                )
-            )
+        val itemSets = mutableSetOf<LR1Item>()
+        val processQueue = ArrayDeque<LR1Item>().apply {
+            addLast(lr1Item)
         }
 
         while (processQueue.isNotEmpty()) {
-            val (item, lookAhead) = processQueue.removeFirst()
+            val item = processQueue.removeFirst()
+            itemSets.add(item)
 
             // 如果当前项目的等待符号是非终结符
             if (item.wait is NonTerminal) {
                 // 遍历所有的产生式
                 this[item.wait]?.forEach { production ->
-                    val equalItem = LR1Item(production, lookAhead)
-                    if (equalItem !in itemSets) {
-                        processQueue.addLast(Pair(equalItem, equalItem.waitK(1).let { wait ->
-                            when (wait) {
-                                is Symbol.NonTerminal -> firstSet[wait]!!.map { it.first }.toSet()
-                                else -> equalItem.lookAhead
-                            }
-                        }))
-                        itemSets.add(equalItem)
+                    // 当前可以移动到的等价产生式
+
+                    // 判断当前的 lookAhead
+                    val lookAhead = item.waitK(1).let { symbol ->
+                        when (symbol) {
+                            is Symbol.NonTerminal -> firstSet[symbol]!!.map { it.first }.toSet()
+                            else -> item.lookAhead
+                        }
                     }
+
+                    LR1Item(production, lookAhead)
+                        .takeIf { it !in itemSets }
+                        ?.let {
+                            println("add $it")
+                            processQueue.addLast(it)
+                        }
                 }
             }
         }
+        println("end ..")
         return itemSets
     }
 

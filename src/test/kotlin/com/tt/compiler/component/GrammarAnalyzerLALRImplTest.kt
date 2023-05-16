@@ -1,5 +1,6 @@
 package com.tt.compiler.component
 
+import com.tt.compiler.component.impl.GrammarAnalyzerLALRImpl
 import com.tt.compiler.grammar.FirstSet
 import com.tt.compiler.grammar.lr.LR1Automaton
 import com.tt.compiler.grammar.lr.LR1Item
@@ -20,19 +21,40 @@ class GrammarAnalyzerLALRImplTest {
     }
 
     @Test
-    fun testBuildLR1Item() {
+    fun testAnalyzeGrammar1() {
+        val analyzer = GrammarAnalyzerLALRImpl(TestGrammar5)
+        analyzer.parseTable.let(::println)
+        analyzer.analyze("b a a").forEach { println(it) }
+    }
+
+    @Test
+    fun testAnalyzeGrammar2() {
+        // TODO Fix Bug
+        val analyzer = GrammarAnalyzerLALRImpl(TestGrammar6)
+        analyzer.parseTable.let(::println)
+        analyzer.analyze("id = id").forEach { println(it) }
+    }
+
+    @Test
+    fun testMergeIdenticalKernel1() {
         val extendedGrammar = TestGrammar5.toExtended()
         val firstSet = FirstSet.from(extendedGrammar)
         val automaton = LR1Automaton(extendedGrammar, firstSet)
-        automaton.itemSets.forEachIndexed { index, closure ->
-            println("I$index:")
-            closure.forEach { println(it) }
-        }
+        val mergedAutomaton = automaton.mergeIdenticalKernelItemSets()
 
-        println("==========")
-        automaton.mergeIdenticalKernelItemSets().itemSets.forEachIndexed { index, closure ->
-            println("I$index:")
-            closure.forEach { println(it) }
+        mergedAutomaton.states.forEach { state ->
+            println(state.value)
+            println(mergedAutomaton.itemSets[state.value])
         }
+    }
+
+    @Test
+    fun testMergeIdenticalKernel2() {
+        val extendedGrammar = TestGrammar6.toExtended()
+        val firstSet = FirstSet.from(extendedGrammar)
+        val automaton = LR1Automaton(extendedGrammar, firstSet)
+        val mergedAutomaton = automaton.mergeIdenticalKernelItemSets()
+
+        mergedAutomaton.states
     }
 }

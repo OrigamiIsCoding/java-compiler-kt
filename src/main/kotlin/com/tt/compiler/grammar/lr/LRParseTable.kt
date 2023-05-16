@@ -41,7 +41,7 @@ interface LRParseTable {
         val indent2 = "\t".repeat(2)
         val indent3 = "\t".repeat(3)
         return "$indent1$tableName {\n${
-            table.keys.sorted()
+            table.keys.sorted().filter { table[it]!!.isNotEmpty() }
                 .joinToString("\n") {
                     indent2 + "State $it:" + table[it]!!.map { (key, value) ->
                         "$key -> $value"
